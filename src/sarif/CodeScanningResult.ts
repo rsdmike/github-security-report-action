@@ -6,65 +6,62 @@ interface Location {
 }
 
 export class PhysicalLocation {
+  private readonly _location: Location
 
-  private _location: Location
-
-  constructor(location: Location) {
-    this._location = location;
+  constructor (location: Location) {
+    this._location = location
   }
 
-  get artifactLocation(): string {
-    return this._location.artifactLocation.uri;
+  get artifactLocation (): string {
+    return this._location.artifactLocation.uri
   }
 
-  get region(): string {
-    return this._location.region;
+  get region (): string {
+    return this._location.region
   }
 }
 
 interface Sarif {
-  ruleId: string,
-  ruleIndex: number,
+  ruleId: string
+  ruleIndex: number
   message: {
-    text: string,
-  },
-  locations: Location[],
+    text: string
+  }
+  locations: Location[]
 }
 
 export default class CodeScanningResult {
+  readonly locations: PhysicalLocation[] | null
 
-  readonly locations: PhysicalLocation[] | null;
+  private readonly _sarif: Sarif
 
-  private _sarif: Sarif
-
-  constructor(sarifResult) {
-    this._sarif = sarifResult;
-    this.locations = extractLocations(sarifResult);
+  constructor (sarifResult) {
+    this._sarif = sarifResult
+    this.locations = extractLocations(sarifResult)
   }
 
-  get ruleId() : string {
-    return this._sarif.ruleId;
+  get ruleId (): string {
+    return this._sarif.ruleId
   }
 
-  get ruleIndex(): number {
-    return this._sarif.ruleIndex;
+  get ruleIndex (): number {
+    return this._sarif.ruleIndex
   }
 
-  get message(): string {
-    return this._sarif.message.text;
+  get message (): string {
+    return this._sarif.message.text
   }
 }
 
-function extractLocations(sarif: Sarif): PhysicalLocation[] | null {
-  if (sarif && sarif.locations) {
-    const results: PhysicalLocation[] = [];
+function extractLocations (sarif: Sarif): PhysicalLocation[] | null {
+  if (sarif?.locations) {
+    const results: PhysicalLocation[] = []
 
     sarif.locations.forEach(location => {
-      results.push(new PhysicalLocation(location));
-    });
+      results.push(new PhysicalLocation(location))
+    })
 
-    return results;
+    return results
   }
-  return null;
+  return null
 }
-

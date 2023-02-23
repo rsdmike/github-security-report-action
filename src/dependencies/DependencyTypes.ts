@@ -46,56 +46,56 @@ query users($organizationName: String!, $repositoryName: String!, $cursor: Strin
     }
   }
 }
-`;
+`
 
-export type RepositoryVulnerabilityAlerts = {
+export interface RepositoryVulnerabilityAlerts {
   repository: {
     vulnerabilityAlerts: {
-      totalCount: number,
+      totalCount: number
       pageInfo: {
-        hasNextPage: boolean,
-        endCursor: string,
-      },
+        hasNextPage: boolean
+        endCursor: string
+      }
       nodes: VulnerabilityAlert[]
     }
   }
 }
 
-export type VulnerabilityAlert = {
-  id: string,
-  createdAt: string,
+export interface VulnerabilityAlert {
+  id: string
+  createdAt: string
   dismisser: {
-    login: string,
-    name: string,
-  },
-  dismissedAt: string,
-  dismissReason: string,
-  vulnerableManifestFilename: string,
-  vulnerableRequirements: string,
+    login: string
+    name: string
+  }
+  dismissedAt: string
+  dismissReason: string
+  vulnerableManifestFilename: string
+  vulnerableRequirements: string
   vulnerableManifestPath
   securityVulnerability: SecurityVulnerability
   securityAdvisory: SecurityAdvisory
 }
 
-export type SecurityVulnerability = {
+export interface SecurityVulnerability {
   package: {
-    ecosystem: string,
+    ecosystem: string
     name: string
   }
-  severity: string,
+  severity: string
   vulnerableVersionRange: string
 }
 
-export type SecurityAdvisory = {
-  databaseId: string,
-  id: string,
+export interface SecurityAdvisory {
+  databaseId: string
+  id: string
   summary: string
-  severity: string,
+  severity: string
   description: string
-  ghsaId: string,
+  ghsaId: string
   identifiers: {
-    type: string,
-    value: string,
+    type: string
+    value: string
   }
   permalink: string
   publishedAt: string
@@ -132,23 +132,23 @@ query ($organizationName: String!, $repositoryName: String!, $cursor: String){
     }
   }
 }
-`;
+`
 
-export type DependencyGraphResult = {
+export interface DependencyGraphResult {
   repository: {
-    name: string,
+    name: string
     dependencyGraphManifests: {
       pageInfo: {
-        hasNextPage: boolean,
-        endCursor: string,
-      },
-      totalCount: number,
+        hasNextPage: boolean
+        endCursor: string
+      }
+      totalCount: number
       edges: DependencySetData[]
     }
   }
 }
 
-export type DependencySetData = {
+export interface DependencySetData {
   node: {
     filename: string
     dependenciesCount: number
@@ -161,11 +161,10 @@ export type DependencySetData = {
   }
 }
 
-export type DependencySetDependencyData = {
+export interface DependencySetDependencyData {
   node: {
     packageName: string
     packageManager: string
     requirements: string
   }
 }
-

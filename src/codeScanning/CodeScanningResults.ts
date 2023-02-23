@@ -1,36 +1,35 @@
-import CodeScanningAlert from './CodeScanningAlert';
+import type CodeScanningAlert from './CodeScanningAlert'
 
 export default class CodeScanningResults {
+  private readonly data: CodeScanningAlert[]
 
-  private data: CodeScanningAlert[];
-
-  constructor() {
-    this.data = [];
+  constructor () {
+    this.data = []
   }
 
-  addCodeScanningAlert(alert: CodeScanningAlert) {
-    this.data.push(alert);
+  addCodeScanningAlert (alert: CodeScanningAlert): void {
+    this.data.push(alert)
   }
 
-  getTools(): string[] {
-    const result: string[] = [];
+  getTools (): string[] {
+    const result: string[] = []
 
     this.data.forEach(alert => {
-      const toolName = alert.toolName;
+      const toolName = alert.toolName
 
-      if (toolName && result.indexOf(toolName) === -1) {
-        result.push(toolName);
+      if (toolName && !result.includes(toolName)) {
+        result.push(toolName)
       }
     })
 
-    return result;
+    return result
   }
 
-  getCodeQLScanningAlerts(): CodeScanningAlert[] {
-    return this.data.filter(value => {
-      //TODO this is now reporting CodeQL command-line toolchain as the name of the tool!
-      // Need to follow up on this with GHAS team on what to expect in the future.
-      return `${value.toolName}`.toLowerCase().startsWith('codeql');
-    });
+  getCodeQLScanningAlerts (): CodeScanningAlert[] {
+    return this.data.filter(value =>
+    // TODO this is now reporting CodeQL command-line toolchain as the name of the tool!
+    // Need to follow up on this with GHAS team on what to expect in the future.
+       `${value.toolName}`.toLowerCase().startsWith('codeql')
+    )
   }
 }
