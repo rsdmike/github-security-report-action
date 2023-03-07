@@ -11,7 +11,7 @@
     "build-exe-windows-x64": "npm run pre-build-exe && nexe -i runtime/index.js -t windows-x64-12.16.2 -o github-security-report",
     "package": "npm run build && ncc build --source-map",
     "postpack": "tarball=$(npm list - depth 0 | sed 's/@/-/g; s/ .*/.tgz/g; 1q;'); tar -tf $tarball | sed 's/^package\\///' | zip -@r github-security-report-bundle",
-    "test": "mocha --recursive -r ts-node/register \"src/**/*.test.ts\""
+    "test": "mocha --recursive --reporter-option maxDiffSize=16384  -r ts-node/register \"src/**/*.test.ts\""
   },
   "keywords": [],
   "author": "Peter Murray",
