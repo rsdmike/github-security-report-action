@@ -7,18 +7,18 @@ along with the ability to in the future provide your own templates to the render
 
 Due to the nature of CodeQL Analysis this action ideally should be executed after the `github/codeql-action/analyze`
 action step, as this will generate the SARIF files on the runner which can be used to identify ALL the rules that were
-applied during the analysis. The results stored on your repository will only contain the results that generated an alert. 
+applied during the analysis. The results stored on your repository will only contain the results that generated an alert.
 
 ## Processing
 
 The action will use the provided token to load all the dependencies, dependency vulnerabilities and the Code Scanning
 results for the specified repository. It will then look in the directory specified for any SARIF reports.
 
-With this data it will construct a JSON payload that it then passes into the template system (using Nunjucks a Jinja 
-like templating system for JavaScript) and will generate a Summary Report (with more of these to come in the future) 
+With this data it will construct a JSON payload that it then passes into the template system (using Nunjucks a Jinja
+like templating system for JavaScript) and will generate a Summary Report (with more of these to come in the future)
 providing a roll up summary security report in HTML.
 
-Using this HTML, it then passes it over to Puppeteer to render this in a headless Chromium before generating a PDF and 
+Using this HTML, it then passes it over to Puppeteer to render this in a headless Chromium before generating a PDF and
 saving it in the specified directory.
 
 ## Parameters
@@ -45,7 +45,7 @@ You can specify a template by using the `template` parameter. Currently the foll
 
 ```
 name: Generate Security Report
-uses: peter-murray/github-security-report-action@v2
+uses: rsdmike/github-security-report-action@v2
 with:
   token: ${{ secrets.SECURITY_TOKEN }}
 ```
@@ -54,13 +54,6 @@ Example summary report output:
 ![Example summary report](summary_report_example.png)
 
 
-## Standalone execution
-
-For the v2 version, there are bundles that can be used to provide a command line client executable for Linux, MacOS and Windows platforms. The bundles can be downloaded from the [v2 Release](https://github.com/peter-murray/github-security-report-action/releases/tag/v2) assets.
-
-* [Linux bundle](https://github.com/peter-murray/github-security-report-action/releases/download/v2/github-security-report-bundle-linux-x64.zip)
-* [MacOS bundle](https://github.com/peter-murray/github-security-report-action/releases/download/v2/github-security-report-bundle-mac-x64.zip)
-* [Windows bundle](https://github.com/peter-murray/github-security-report-action/releases/download/v2/github-security-report-bundle-windows-x64.zip)
 
 ### Installation
 Just download and extract the zip bundle for your target platform. Inside there is a file starting with `github-security-report` with a target platform suffix or .exe extension in the case of Windows.
@@ -85,4 +78,4 @@ The above command would output a `summary.pdf` file in the current working direc
 
 * Additional work on the currently available reports
 * Example of extending html templates and using them
- 
+

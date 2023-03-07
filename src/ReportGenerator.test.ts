@@ -1,8 +1,11 @@
-import { expect } from 'chai';
-import ReportGenerator from './ReportGenerator';
-import { getOctoKit, getSampleSarifDirectory, getTestDirectoryFilePath } from './testUtils';
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
+import { expect } from 'chai'
+import ReportGenerator from './ReportGenerator'
+import { getOctoKit, getSampleSarifDirectory, getTestDirectoryFilePath } from './testUtils'
 
-const mockedOctoKit = getOctoKit();
+const mockedOctoKit = getOctoKit()
 
 const SIMPLE_TEST_REPOSITORY = {
   repository: 'octodemo/ghas-reporting',
@@ -15,7 +18,6 @@ const PM_AS_JAVA = {
 }
 
 describe('ReportGenerator', function () {
-
   this.timeout(10 * 1000);
 
   [SIMPLE_TEST_REPOSITORY, PM_AS_JAVA].forEach(config => {
@@ -32,12 +34,10 @@ describe('ReportGenerator', function () {
         }
       }
 
-      const generator = new ReportGenerator(generatorConfig);
-      const file = await generator.run();
-      expect(file).to.contain(generatorConfig.outputDirectory);
-      //TODO need to store an expected result
-    });
+      const generator = new ReportGenerator(generatorConfig)
+      const file = await generator.run()
+      expect(file).to.contain(generatorConfig.outputDirectory)
+      // TODO need to store an expected result
+    })
   })
-
-
-});
+})

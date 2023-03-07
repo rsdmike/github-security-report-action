@@ -1,42 +1,44 @@
-import CodeScanningRule from '../sarif/CodeScanningRule';
-import Vulnerability from '../dependencies/Vulnerability';
-import DependencySet from '../dependencies/DependencySet';
-import { SarifFile } from '../sarif/SarifReportFinder';
-import CodeScanningResults from '../codeScanning/CodeScanningResults';
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
+import type CodeScanningRule from '../sarif/CodeScanningRule'
+import type Vulnerability from '../dependencies/Vulnerability'
+import type DependencySet from '../dependencies/DependencySet'
+import { type SarifFile } from '../sarif/SarifReportFinder'
+import type CodeScanningResults from '../codeScanning/CodeScanningResults'
+import { AlertInstanceLocation } from '../codeScanning/CodeScanningAlert'
 
-export type RuleData = {
-  name: string,
-  severity: string,
-  precision: string,
-  kind: string,
-  shortDescription: string,
-  description: string,
-  tags: string[],
+export interface RuleData {
+  name: string
+  severity: string
+  precision: string
+  kind: string
+  shortDescription: string
+  description: string
+  tags: string[]
   cwe: string[]
 }
 
-export type Repo = {
-  owner: string,
+export interface Repo {
+  owner: string
   repo: string
 }
 
-export type CodeScanningRules = {
-  [key: string]: CodeScanningRule
-}
+export type CodeScanningRules = Record<string, CodeScanningRule>
 
-export type CollectedData = {
+export interface CollectedData {
   github: Repo
-  vulnerabilities: Vulnerability[],
-  dependencies: DependencySet[],
-  sarifReports: SarifFile[],
-  codeScanningOpen: CodeScanningResults,
-  codeScanningClosed: CodeScanningResults,
+  vulnerabilities: Vulnerability[]
+  dependencies: DependencySet[]
+  sarifReports: SarifFile[]
+  codeScanningOpen: CodeScanningResults
+  codeScanningClosed: CodeScanningResults
 }
 
-export type JsonPayload = {
-  github: Repo,
+export interface JsonPayload {
+  github: Repo
   metadata: {
-    created: string,
+    created: string
   }
   sca: {
     dependencies: DependencySummary
@@ -44,86 +46,83 @@ export type JsonPayload = {
       total: number
       bySeverity: ServerityToVulnerabilities
     }
-  },
+  }
   scanning: {
-    rules: RuleData[],
-    cwe: CWECoverage | {},
+    rules: RuleData[]
+    cwe: CWECoverage | Record<string, unknown>
     results: CodeScanSummary
   }
 }
 
-export type DependencySummary = {
+export interface DependencySummary {
   manifests: {
-    processed: Manifest[],
-    unprocessed: Manifest[],
-  },
-  totalDependencies: number,
+    processed: Manifest[]
+    unprocessed: Manifest[]
+  }
+  totalDependencies: number
   dependencies: Dependencies
 }
 
-export type Manifest = {
-  filename: string,
-  path: string,
+export interface Manifest {
+  filename: string
+  path: string
 }
 
-export type Dependencies = {
-  [key: string]: Dependency[]
-}
+export type Dependencies = Record<string, Dependency[]>
 
-export type Dependency = {
-  name: string,
-  type: string,
+export interface Dependency {
+  name: string
+  type: string
   version: string
 }
 
-export type ServerityToVulnerabilities = {
-  [key: string]: Vulnerability[]
+export type ServerityToVulnerabilities = Record<string, Vulnerability[]>
+
+export interface AlertSummary {
+  tool: string | null
+  name: string
+  state: string
+  created: string
+  url: string
+  instance: AlertInstanceLocation
+  rule: {
+    id: string
+    details?: CodeScanningRule
+  }
+  dismissedAt: string
+  dismissedBy: string
+  dismissedReason: string
 }
 
-export type AlertSummary = {
-  tool: string | null,
-  name: string,
-  state: string,
-  created: string,
-  url: string,
+export type SeverityToAlertSummary = Record<string, AlertSummary[]>
+
+export interface AggregatedAlertSummary {
+  tool: string | null
+  name: string
+  state: string
+  created: string
+  instances: AlertSummary[]
   rule: {
     id: string
     details?: CodeScanningRule
   }
 }
 
-export type SeverityToAlertSummary = {
-  [key: string]: AlertSummary[]
-}
+export type SeverityToAggregatedAlertSummary = Record<string, AggregatedAlertSummary[]>
 
-export type AggregatedAlertSummary = {
-  tool: string | null,
-  name: string,
-  state: string,
-  created: string,
-  instances: AlertSummary[],
-  rule: {
-    id: string
-    details?: CodeScanningRule
-  }
-}
-
-export type SeverityToAggregatedAlertSummary = {
-  [key: string]: AggregatedAlertSummary[]
-}
-
-export type CodeScanResults = {
-  total: number,
-  scans: SeverityToAlertSummary,
+export interface CodeScanResults {
+  total: number
+  scans: SeverityToAlertSummary
   scansByRule: SeverityToAggregatedAlertSummary
 }
 
-export type CWECoverage = {
-  cweToRules: {[key: string]: RuleData[]},
+export interface CWECoverage {
+  cweToRules: Record<string, RuleData[]>
   cwes: string[]
+  rules: RuleData[]
 }
 
-export type CodeScanSummary = {
-  open: CodeScanResults,
+export interface CodeScanSummary {
+  open: CodeScanResults
   closed: CodeScanResults
 }
