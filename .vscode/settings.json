@@ -1,6 +1,6 @@
 {
   "debug.onTaskErrors": "showErrors",
-  "files.trimTrailingWhitespace": true,
+  "files.trimTrailingWhitespace": false,
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,

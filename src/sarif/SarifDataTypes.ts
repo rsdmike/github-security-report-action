@@ -1,39 +1,42 @@
-export type SarifReportData = {
-  version: string,
-  runs: SarifRun[],
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
+export interface SarifReportData {
+  version: string
+  runs: SarifRun[]
 }
 
-export type SarifRun = {
+export interface SarifRun {
   tool: {
     driver: {
-      name: string,
+      name: string
       rules: SarifRule[]
-    },
+    }
     extensions?: ToolExtension[]
   }
 }
 
-export type ToolExtension = {
-  name: string,
+export interface ToolExtension {
+  name: string
   rules: SarifRule[]
 }
 
-export type SarifRule = {
-  id: string,
-  name: string,
+export interface SarifRule {
+  id: string
+  name: string
   shortDescription: {
-    text: string,
-  },
+    text: string
+  }
   fullDescription: {
-    text: string,
-  },
+    text: string
+  }
   properties: {
-    tags: string[],
-    precision: string,
-    kind: string,
+    tags: string[]
+    precision: string
+    kind: string
 
-  },
+  }
   defaultConfiguration: {
-    level: string,
+    level: string
   }
 }

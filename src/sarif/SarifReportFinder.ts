@@ -1,70 +1,67 @@
-import * as path from 'path';
-import * as fs from 'fs';
-import SarifReport from './SarifReport';
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
+import * as path from 'path'
+import * as fs from 'fs'
+import SarifReport from './SarifReport'
 
-export type SarifFile = {
-  file: string,
+export interface SarifFile {
+  file: string
   payload: SarifReport
 }
 
 export default class SarifReportFinder {
+  private readonly dir: string
 
-  private readonly dir: string;
-
-  constructor(dir: string) {
-    this.dir = dir;
+  constructor (dir: string) {
+    this.dir = dir
   }
 
-  getSarifFiles(): Promise<SarifFile[]> {
+  async getSarifFiles (): Promise<SarifFile[]> {
     const dir = this.dir
-      , promises: Promise<SarifFile>[] = []
-    ;
+    const promises: Array<Promise<SarifFile>> = []
 
     if (!fs.existsSync(dir)) {
-      throw new Error(`SARIF Finder, path "${dir}", does not exist.`);
+      throw new Error(`SARIF Finder, path "${dir}", does not exist.`)
     }
 
-    console.log(`SARIF File Finder, processing: ${dir}`);
+    console.log(`SARIF File Finder, processing: ${dir}`)
     if (fs.lstatSync(dir).isDirectory()) {
-      console.log(`  is a directory, looking for files`);
+      console.log('  is a directory, looking for files')
 
       const files = fs.readdirSync(dir) // TODO use promises here
         .filter(f => f.endsWith('.sarif'))
-        .map(f => path.resolve(dir, f));
+        .map(f => path.resolve(dir, f))
 
-      console.log(`  SARIF files detected: ${JSON.stringify(files)}`);
+      console.log(`  SARIF files detected: ${JSON.stringify(files)}`)
       if (files) {
         files.forEach(f => {
-          promises.push(loadFileContents(f));
-        });
+          promises.push(loadFileContents(f))
+        })
       }
     }
 
     if (promises.length > 0) {
-      return Promise.all(promises);
+      return await Promise.all(promises)
     } else {
-      return Promise.resolve([]);
+      return await Promise.resolve([])
     }
   }
 }
 
-function loadFileContents(file: string): Promise<SarifFile> {
-  return fs.promises.open(file, 'r')
-    .then(fileHandle => {
-      return fileHandle.readFile()
-        .then(content => {
-          fileHandle.close();
-          try {
-            return JSON.parse(content.toString('utf8'));
-          } catch (err) {
-            throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`);
-          }
-        })
-        .then(data => {
-          return {
-            file: file,
-            payload: new SarifReport(data),
-          };
-        })
-    });
+async function loadFileContents (file: string): Promise<SarifFile> {
+  return await fs.promises.open(file, 'r')
+    .then(async fileHandle => await fileHandle.readFile()
+      .then(async content => {
+        await fileHandle.close()
+        try {
+          return JSON.parse(content.toString('utf8'))
+        } catch (err) {
+          throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`)
+        }
+      })
+      .then(data => ({
+        file,
+        payload: new SarifReport(data)
+      })))
 }

@@ -1,15 +1,18 @@
-import ReportGenerator from './ReportGenerator';
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
+import ReportGenerator from './ReportGenerator'
 
-import * as core from '@actions/core';
-import { Octokit } from '@octokit/rest';
+import * as core from '@actions/core'
+import { Octokit } from '@octokit/rest'
 
-async function run(): Promise<void> {
+async function run (): Promise<void> {
   try {
-    const token = getRequiredInputValue('token');
+    const token = getRequiredInputValue('token')
 
     const generator = new ReportGenerator({
       repository: getRequiredInputValue('repository'),
-      octokit: new Octokit({auth: token}),
+      octokit: new Octokit({ auth: token }),
 
       sarifReportDirectory: getRequiredInputValue('sarifReportDir'),
       outputDirectory: getRequiredInputValue('outputDir'),
@@ -17,17 +20,17 @@ async function run(): Promise<void> {
       templating: {
         name: getRequiredInputValue('template')
       }
-    });
+    })
 
-    const file = await generator.run();
-    console.log(file);
-  } catch (err) {
-    core.setFailed(err.message);
+    const file = await generator.run()
+    console.log(file)
+  } catch (err: any) {
+    core.setFailed(err.message)
   }
 }
 
-run();
+void run()
 
-function getRequiredInputValue(key: string): string {
-  return core.getInput(key, {required: true});
+function getRequiredInputValue (key: string): string {
+  return core.getInput(key, { required: true })
 }
