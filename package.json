@@ -24,7 +24,7 @@
     "marked": "^4.2.12",
     "nunjucks": "^3.2.3",
     "nunjucks-markdown": "^2.0.1",
-    "puppeteer-core": "^19.7.3"
+    "puppeteer-core": "^19.7.4"
   },
   "devDependencies": {
     "@octokit/types": "^9.0.0",
