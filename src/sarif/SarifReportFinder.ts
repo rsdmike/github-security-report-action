@@ -4,6 +4,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import SarifReport from './SarifReport'
+import { type SarifReportData } from './SarifDataTypes'
 
 export interface SarifFile {
   file: string
@@ -50,18 +51,19 @@ export default class SarifReportFinder {
 }
 
 async function loadFileContents (file: string): Promise<SarifFile> {
-  return await fs.promises.open(file, 'r')
-    .then(async fileHandle => await fileHandle.readFile()
-      .then(async content => {
-        await fileHandle.close()
-        try {
-          return JSON.parse(content.toString('utf8'))
-        } catch (err) {
-          throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`)
-        }
-      })
-      .then(data => ({
-        file,
-        payload: new SarifReport(data)
-      })))
+  const fileHandle = await fs.promises.open(file, 'r')
+  const content = await fileHandle.readFile()
+
+  let data: SarifReportData
+  await fileHandle.close()
+  try {
+    data = JSON.parse(content.toString('utf8'))
+  } catch (err) {
+    throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`)
+  }
+
+  return {
+    file,
+    payload: new SarifReport(data)
+  }
 }

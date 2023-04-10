@@ -1,6 +1,6 @@
-name: GitHub Security Report Action
+name: CodeQL and Dependabot Report Action
 description: Generates security reports for a GitHub repository
-author: Peter Murray
+author: Mike Johanson
 
 inputs:
   token:
