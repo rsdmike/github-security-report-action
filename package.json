@@ -2,6 +2,7 @@
   "name": "github-security-report",
   "version": "2.0.0",
   "description": "Generates a report from GitHub CodeQL and Dependency information",
+  "main": "lib/index.js",
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .ts",
