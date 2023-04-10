@@ -40,23 +40,23 @@ export default class DataCollector {
     const codeScanning = new GitHubCodeScanning(this.octokit)
     const sarifFinder = new SarifReportFinder(sarifReportDir)
 
-    return await Promise.all([
+    const results = await Promise.all([
       sarifFinder.getSarifFiles(),
       ghDeps.getAllDependencies(this.repo),
       ghDeps.getAllVulnerabilities(this.repo),
       codeScanning.getOpenCodeScanningAlerts(this.repo),
       codeScanning.getClosedCodeScanningAlerts(this.repo)
-    ]).then(results => {
-      const data: CollectedData = {
-        github: this.repo,
-        sarifReports: results[0],
-        dependencies: results[1],
-        vulnerabilities: results[2],
-        codeScanningOpen: results[3],
-        codeScanningClosed: results[4]
-      }
+    ])
 
-      return new ReportData(data)
-    })
+    const data: CollectedData = {
+      github: this.repo,
+      sarifReports: results[0],
+      dependencies: results[1],
+      vulnerabilities: results[2],
+      codeScanningOpen: results[3],
+      codeScanningClosed: results[4]
+    }
+
+    return new ReportData(data)
   }
 }
