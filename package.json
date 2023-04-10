@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .ts",
-    "package": "npm run build && ncc build --source-map",
+    "package": "npm run build && ncc build --no-source-map-register",
     "postpack": "tarball=$(npm list - depth 0 | sed 's/@/-/g; s/ .*/.tgz/g; 1q;'); tar -tf $tarball | sed 's/^package\\///' | zip -@r github-security-report-bundle",
     "test": "mocha --recursive --reporter-option maxDiffSize=16384  -r ts-node/register \"src/**/*.test.ts\""
   },
