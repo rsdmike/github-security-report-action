@@ -5,6 +5,7 @@ import ReportGenerator from './ReportGenerator'
 
 import * as core from '@actions/core'
 import { Octokit } from '@octokit/rest'
+import path from 'path'
 
 async function run (): Promise<void> {
   try {
@@ -18,7 +19,7 @@ async function run (): Promise<void> {
       outputDirectory: getRequiredInputValue('outputDir'),
 
       templating: {
-        directory: './templates',
+        directory: path.join(__dirname, 'templates'),
         name: getRequiredInputValue('template')
       }
     })

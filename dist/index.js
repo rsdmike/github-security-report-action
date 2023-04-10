@@ -675,6 +675,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const ReportGenerator_1 = __importDefault(__nccwpck_require__(637));
 const core = __importStar(__nccwpck_require__(2186));
 const rest_1 = __nccwpck_require__(5375);
+const path_1 = __importDefault(__nccwpck_require__(1017));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -685,7 +686,7 @@ function run() {
                 sarifReportDirectory: getRequiredInputValue('sarifReportDir'),
                 outputDirectory: getRequiredInputValue('outputDir'),
                 templating: {
-                    directory: './templates',
+                    directory: path_1.default.join(__dirname, 'templates'),
                     name: getRequiredInputValue('template')
                 }
             });
