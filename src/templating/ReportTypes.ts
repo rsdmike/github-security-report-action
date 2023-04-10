@@ -6,7 +6,7 @@ import type Vulnerability from '../dependencies/Vulnerability'
 import type DependencySet from '../dependencies/DependencySet'
 import { type SarifFile } from '../sarif/SarifReportFinder'
 import type CodeScanningResults from '../codeScanning/CodeScanningResults'
-import { AlertInstanceLocation } from '../codeScanning/CodeScanningAlert'
+import { type AlertInstanceLocation } from '../codeScanning/CodeScanningAlert'
 
 export interface RuleData {
   name: string

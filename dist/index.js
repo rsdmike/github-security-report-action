@@ -36,15 +36,6 @@ module.exports = webpackEmptyContext;
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -54,6 +45,8 @@ const GitHubDependencies_1 = __importDefault(__nccwpck_require__(9243));
 const SarifReportFinder_1 = __importDefault(__nccwpck_require__(4954));
 const ReportData_1 = __importDefault(__nccwpck_require__(6302));
 class DataCollector {
+    repo;
+    octokit;
     constructor(octokit, repo) {
         if (!octokit) {
             throw new Error('A GitHub Octokit client needs to be provided');
@@ -68,28 +61,26 @@ class DataCollector {
             repo: parts[1]
         };
     }
-    getPayload(sarifReportDir) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const ghDeps = new GitHubDependencies_1.default(this.octokit);
-            const codeScanning = new GitHubCodeScanning_1.default(this.octokit);
-            const sarifFinder = new SarifReportFinder_1.default(sarifReportDir);
-            const results = yield Promise.all([
-                sarifFinder.getSarifFiles(),
-                ghDeps.getAllDependencies(this.repo),
-                ghDeps.getAllVulnerabilities(this.repo),
-                codeScanning.getOpenCodeScanningAlerts(this.repo),
-                codeScanning.getClosedCodeScanningAlerts(this.repo)
-            ]);
-            const data = {
-                github: this.repo,
-                sarifReports: results[0],
-                dependencies: results[1],
-                vulnerabilities: results[2],
-                codeScanningOpen: results[3],
-                codeScanningClosed: results[4]
-            };
-            return new ReportData_1.default(data);
-        });
+    async getPayload(sarifReportDir) {
+        const ghDeps = new GitHubDependencies_1.default(this.octokit);
+        const codeScanning = new GitHubCodeScanning_1.default(this.octokit);
+        const sarifFinder = new SarifReportFinder_1.default(sarifReportDir);
+        const results = await Promise.all([
+            sarifFinder.getSarifFiles(),
+            ghDeps.getAllDependencies(this.repo),
+            ghDeps.getAllVulnerabilities(this.repo),
+            codeScanning.getOpenCodeScanningAlerts(this.repo),
+            codeScanning.getClosedCodeScanningAlerts(this.repo)
+        ]);
+        const data = {
+            github: this.repo,
+            sarifReports: results[0],
+            dependencies: results[1],
+            vulnerabilities: results[2],
+            codeScanningOpen: results[3],
+            codeScanningClosed: results[4]
+        };
+        return new ReportData_1.default(data);
     }
 }
 exports["default"] = DataCollector;
@@ -125,15 +116,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -144,19 +126,18 @@ const pdfWriter_1 = __nccwpck_require__(3174);
 const path = __importStar(__nccwpck_require__(1017));
 const io_1 = __nccwpck_require__(7351);
 class ReportGenerator {
+    config;
     constructor(config) {
         this.config = config;
     }
-    run() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const config = this.config;
-            const collector = new DataCollector_1.default(config.octokit, config.repository);
-            const reportData = yield collector.getPayload(config.sarifReportDirectory);
-            const reportTemplate = new Template_1.default(config.templating.directory);
-            const html = reportTemplate.render(reportData.getJSONPayload(), config.templating.name);
-            yield (0, io_1.mkdirP)(config.outputDirectory);
-            return yield (0, pdfWriter_1.createPDF)(html, path.join(config.outputDirectory, config.templating.name + '.pdf'));
-        });
+    async run() {
+        const config = this.config;
+        const collector = new DataCollector_1.default(config.octokit, config.repository);
+        const reportData = await collector.getPayload(config.sarifReportDirectory);
+        const reportTemplate = new Template_1.default(config.templating.directory);
+        const html = reportTemplate.render(reportData.getJSONPayload(), config.templating.name);
+        await (0, io_1.mkdirP)(config.outputDirectory);
+        return await (0, pdfWriter_1.createPDF)(html, path.join(config.outputDirectory, config.templating.name + '.pdf'));
     }
 }
 exports["default"] = ReportGenerator;
@@ -171,6 +152,7 @@ exports["default"] = ReportGenerator;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class CodeScanningAlert {
+    data;
     constructor(data) {
         this.data = data;
     }
@@ -184,17 +166,16 @@ class CodeScanningAlert {
         return this.data.created_at;
     }
     get mostRecentInstance() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         const instanceLocation = {
             commitSHA: this.data.most_recent_instance.commit_sha,
             location: {
-                path: (_b = (_a = this.data.most_recent_instance.location) === null || _a === void 0 ? void 0 : _a.path) !== null && _b !== void 0 ? _b : '',
-                startLine: (_d = (_c = this.data.most_recent_instance.location) === null || _c === void 0 ? void 0 : _c.start_line) !== null && _d !== void 0 ? _d : 0,
-                endLine: (_f = (_e = this.data.most_recent_instance.location) === null || _e === void 0 ? void 0 : _e.end_line) !== null && _f !== void 0 ? _f : 0,
-                startColumn: (_h = (_g = this.data.most_recent_instance.location) === null || _g === void 0 ? void 0 : _g.start_column) !== null && _h !== void 0 ? _h : 0,
-                endColumn: (_k = (_j = this.data.most_recent_instance.location) === null || _j === void 0 ? void 0 : _j.end_column) !== null && _k !== void 0 ? _k : 0
+                path: this.data.most_recent_instance.location?.path ?? '',
+                startLine: this.data.most_recent_instance.location?.start_line ?? 0,
+                endLine: this.data.most_recent_instance.location?.end_line ?? 0,
+                startColumn: this.data.most_recent_instance.location?.start_column ?? 0,
+                endColumn: this.data.most_recent_instance.location?.end_column ?? 0
             },
-            message: (_m = (_l = this.data.most_recent_instance.message) === null || _l === void 0 ? void 0 : _l.text) !== null && _m !== void 0 ? _m : ''
+            message: this.data.most_recent_instance.message?.text ?? ''
         };
         return instanceLocation;
     }
@@ -219,9 +200,8 @@ class CodeScanningAlert {
         return result;
     }
     get severity() {
-        var _a, _b;
         // return this.rule ? this.rule.severity : null;
-        return (_b = (_a = this.rule.security_severity_level) !== null && _a !== void 0 ? _a : this.rule.severity) !== null && _b !== void 0 ? _b : '';
+        return this.rule.security_severity_level ?? this.rule.severity ?? '';
     }
     get state() {
         return this.data.state;
@@ -230,20 +210,16 @@ class CodeScanningAlert {
         return this.data.rule;
     }
     get ruleId() {
-        var _a;
-        return (_a = this.rule.id) !== null && _a !== void 0 ? _a : '';
+        return this.rule.id ?? '';
     }
     get ruleDescription() {
-        var _a;
-        return (_a = this.rule.description) !== null && _a !== void 0 ? _a : '';
+        return this.rule.description ?? '';
     }
     get toolName() {
-        var _a, _b;
-        return (_b = (_a = this.data.tool) === null || _a === void 0 ? void 0 : _a.name) !== null && _b !== void 0 ? _b : null;
+        return this.data.tool?.name ?? null;
     }
     get toolVersion() {
-        var _a, _b;
-        return (_b = (_a = this.data.tool) === null || _a === void 0 ? void 0 : _a.version) !== null && _b !== void 0 ? _b : null;
+        return this.data.tool?.version ?? null;
     }
 }
 exports["default"] = CodeScanningAlert;
@@ -258,6 +234,7 @@ exports["default"] = CodeScanningAlert;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class CodeScanningResults {
+    data;
     constructor() {
         this.data = [];
     }
@@ -291,15 +268,6 @@ exports["default"] = CodeScanningResults;
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -307,35 +275,30 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const CodeScanningAlert_1 = __importDefault(__nccwpck_require__(463));
 const CodeScanningResults_1 = __importDefault(__nccwpck_require__(1154));
 class GitHubCodeScanning {
+    octokit;
     constructor(octokit) {
         this.octokit = octokit;
     }
-    getOpenCodeScanningAlerts(repo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield getCodeScanning(this.octokit, repo, 'open');
-        });
+    async getOpenCodeScanningAlerts(repo) {
+        return await getCodeScanning(this.octokit, repo, 'open');
     }
-    getClosedCodeScanningAlerts(repo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield getCodeScanning(this.octokit, repo, 'dismissed');
-        });
+    async getClosedCodeScanningAlerts(repo) {
+        return await getCodeScanning(this.octokit, repo, 'dismissed');
     }
 }
 exports["default"] = GitHubCodeScanning;
-function getCodeScanning(octokit, repo, state) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const params = {
-            owner: repo.owner,
-            repo: repo.repo,
-            state
-        };
-        const alerts = yield octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts', params);
-        const results = new CodeScanningResults_1.default();
-        alerts.forEach((alert) => {
-            results.addCodeScanningAlert(new CodeScanningAlert_1.default(alert));
-        });
-        return results;
+async function getCodeScanning(octokit, repo, state) {
+    const params = {
+        owner: repo.owner,
+        repo: repo.repo,
+        state
+    };
+    const alerts = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts', params);
+    const results = new CodeScanningResults_1.default();
+    alerts.forEach((alert) => {
+        results.addCodeScanningAlert(new CodeScanningAlert_1.default(alert));
     });
+    return results;
 }
 //# sourceMappingURL=GitHubCodeScanning.js.map
 
@@ -348,6 +311,7 @@ function getCodeScanning(octokit, repo, state) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class Dependency {
+    data;
     constructor(data) {
         this.data = data;
     }
@@ -380,6 +344,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
  **********************************************************************/
 const Dependency_1 = __importDefault(__nccwpck_require__(2096));
 class DependencySet {
+    data;
     constructor(data) {
         this.data = data;
     }
@@ -515,15 +480,6 @@ query ($organizationName: String!, $repositoryName: String!, $cursor: String){
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -532,53 +488,51 @@ const DependencyTypes_1 = __nccwpck_require__(8151);
 const Vulnerability_1 = __importDefault(__nccwpck_require__(748));
 const DependencySet_1 = __importDefault(__nccwpck_require__(9688));
 class GitHubDependencies {
+    octokit;
     constructor(octokit) {
         this.octokit = octokit;
     }
-    getAllVulnerabilities(repo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            function extractVulnerabilityAlerts(data) {
-                return data.repository.vulnerabilityAlerts.nodes;
-            }
-            const data = yield this.getPaginatedQuery(DependencyTypes_1.QUERY_SECURITY_VULNERABILITIES, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.vulnerabilityAlerts.pageInfo', extractVulnerabilityAlerts);
-            return data.map(val => new Vulnerability_1.default(val));
-        });
+    async getAllVulnerabilities(repo) {
+        function extractVulnerabilityAlerts(data) {
+            return data.repository.vulnerabilityAlerts.nodes;
+        }
+        const data = await this.getPaginatedQuery(DependencyTypes_1.QUERY_SECURITY_VULNERABILITIES, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.vulnerabilityAlerts.pageInfo', extractVulnerabilityAlerts);
+        return data.map(val => new Vulnerability_1.default(val));
     }
-    getAllDependencies(repo) {
-        return __awaiter(this, void 0, void 0, function* () {
-            function extractDependencySetData(data) {
-                return data.repository.dependencyGraphManifests.edges;
-            }
-            const data = yield this.getPaginatedQuery(DependencyTypes_1.QUERY_DEPENDENCY_GRAPH, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.dependencyGraphManifests.pageInfo', extractDependencySetData, { accept: 'application/vnd.github.hawkgirl-preview+json' });
-            return data.map(node => new DependencySet_1.default(node));
-        });
+    async getAllDependencies(repo) {
+        function extractDependencySetData(data) {
+            return data.repository.dependencyGraphManifests.edges;
+        }
+        const data = await this.getPaginatedQuery(DependencyTypes_1.QUERY_DEPENDENCY_GRAPH, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.dependencyGraphManifests.pageInfo', extractDependencySetData, { accept: 'application/vnd.github.hawkgirl-preview+json' });
+        return data.map(node => new DependencySet_1.default(node));
     }
-    getPaginatedQuery(query, parameters, pageInfoPath, extractResultsFn, headers) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const octokit = this.octokit;
-            const results = [];
-            const queryParameters = Object.assign({ cursor: null }, parameters);
-            let hasNextPage = false;
-            do {
-                const graphqlParameters = buildGraphQLParameters(query, queryParameters, headers);
-                const queryResult = yield octokit.graphql(graphqlParameters);
-                // @ts-expect-error - unknown why to expect error
-                const extracted = extractResultsFn(queryResult);
-                // @ts-expect-error - unknown why to expect error
-                results.push(...extracted);
-                const pageInfo = getObject(queryResult, ...pageInfoPath.split('.'));
-                hasNextPage = pageInfo ? pageInfo.hasNextPage : false;
-                if (hasNextPage && pageInfo != null) {
-                    queryParameters.cursor = pageInfo.endCursor;
-                }
-            } while (hasNextPage);
-            return results;
-        });
+    async getPaginatedQuery(query, parameters, pageInfoPath, extractResultsFn, headers) {
+        const octokit = this.octokit;
+        const results = [];
+        const queryParameters = Object.assign({ cursor: null }, parameters);
+        let hasNextPage = false;
+        do {
+            const graphqlParameters = buildGraphQLParameters(query, queryParameters, headers);
+            const queryResult = await octokit.graphql(graphqlParameters);
+            // @ts-expect-error - unknown why to expect error
+            const extracted = extractResultsFn(queryResult);
+            // @ts-expect-error - unknown why to expect error
+            results.push(...extracted);
+            const pageInfo = getObject(queryResult, ...pageInfoPath.split('.'));
+            hasNextPage = pageInfo ? pageInfo.hasNextPage : false;
+            if (hasNextPage && pageInfo != null) {
+                queryParameters.cursor = pageInfo.endCursor;
+            }
+        } while (hasNextPage);
+        return results;
     }
 }
 exports["default"] = GitHubDependencies;
 function buildGraphQLParameters(query, parameters, headers) {
-    const result = Object.assign(Object.assign({}, (parameters || {})), { query });
+    const result = {
+        ...(parameters || {}),
+        query
+    };
     if (headers) {
         result.headers = headers;
     }
@@ -607,6 +561,7 @@ function getObject(target, ...path) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class Vulnerability {
+    data;
     constructor(data) {
         this.data = data;
     }
@@ -649,8 +604,7 @@ class Vulnerability {
         return this.advisory.permalink;
     }
     get state() {
-        var _a;
-        return (_a = this.data.state) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+        return this.data.state?.toLowerCase();
     }
 }
 exports["default"] = Vulnerability;
@@ -686,15 +640,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -706,27 +651,25 @@ const ReportGenerator_1 = __importDefault(__nccwpck_require__(637));
 const core = __importStar(__nccwpck_require__(2186));
 const rest_1 = __nccwpck_require__(5375);
 const path_1 = __importDefault(__nccwpck_require__(1017));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const token = getRequiredInputValue('token');
-            const generator = new ReportGenerator_1.default({
-                repository: getRequiredInputValue('repository'),
-                octokit: new rest_1.Octokit({ auth: token }),
-                sarifReportDirectory: getRequiredInputValue('sarifReportDir'),
-                outputDirectory: getRequiredInputValue('outputDir'),
-                templating: {
-                    directory: path_1.default.join(__dirname, 'templates'),
-                    name: getRequiredInputValue('template')
-                }
-            });
-            const file = yield generator.run();
-            console.log(file);
-        }
-        catch (err) {
-            core.setFailed(err.message);
-        }
-    });
+async function run() {
+    try {
+        const token = getRequiredInputValue('token');
+        const generator = new ReportGenerator_1.default({
+            repository: getRequiredInputValue('repository'),
+            octokit: new rest_1.Octokit({ auth: token }),
+            sarifReportDirectory: getRequiredInputValue('sarifReportDir'),
+            outputDirectory: getRequiredInputValue('outputDir'),
+            templating: {
+                directory: path_1.default.join(__dirname, 'templates'),
+                name: getRequiredInputValue('template')
+            }
+        });
+        const file = await generator.run();
+        console.log(file);
+    }
+    catch (err) {
+        core.setFailed(err.message);
+    }
 }
 void run();
 function getRequiredInputValue(key) {
@@ -737,51 +680,39 @@ function getRequiredInputValue(key) {
 /***/ }),
 
 /***/ 3174:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createPDF = void 0;
+/*********************************************************************
+ * Copyright (c) Intel Corporation 2023
+ **********************************************************************/
 const puppeteer_core_1 = __nccwpck_require__(4807);
-function createPDF(html, file) {
-    return __awaiter(this, void 0, void 0, function* () {
-        //  const fetcher = new BrowserFetcher({ path: tmpdir() })
-        try {
-            // const revisionInfo = await fetcher.('818858') // TODO need to store and inject this
-            // if (revisionInfo != null) {
-            const browser = yield (0, puppeteer_core_1.launch)({
-                channel: 'chrome',
-                headless: true,
-                devtools: true,
-                args: [
-                    '--ignore-certificate-errors',
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-accelerated-2d-canvas',
-                    '--disable-gpu'
-                ]
-            });
-            const page = yield browser.newPage();
-            yield page.setContent(html);
-            yield page.pdf({ path: file, format: 'A4' });
-            yield browser.close();
-            // }
-        }
-        catch (err) {
-            console.error(err);
-        }
-        return file;
-    });
+async function createPDF(html, file) {
+    try {
+        const browser = await (0, puppeteer_core_1.launch)({
+            channel: 'chrome',
+            headless: true,
+            devtools: true,
+            args: [
+                '--ignore-certificate-errors',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu'
+            ]
+        });
+        const page = await browser.newPage();
+        await page.setContent(html);
+        await page.pdf({ path: file, format: 'A4' });
+        await browser.close();
+    }
+    catch (err) {
+        console.error(err);
+    }
+    return file;
 }
 exports.createPDF = createPDF;
 //# sourceMappingURL=pdfWriter.js.map
@@ -796,6 +727,8 @@ exports.createPDF = createPDF;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const CWE_REGEX = /external\/cwe\/(cwe-.*)/;
 class CodeScanningRule {
+    sarifRule;
+    cwes;
     constructor(sarifRule) {
         this.sarifRule = sarifRule;
         this.cwes = getCWEs(sarifRule.properties.tags);
@@ -859,6 +792,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
  **********************************************************************/
 const CodeScanningRule_1 = __importDefault(__nccwpck_require__(3648));
 class SarifReport {
+    data;
+    rules;
     constructor(data) {
         this.data = data;
         this.rules = getRules(data) || [];
@@ -937,15 +872,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -957,56 +883,53 @@ const path = __importStar(__nccwpck_require__(1017));
 const fs = __importStar(__nccwpck_require__(7147));
 const SarifReport_1 = __importDefault(__nccwpck_require__(876));
 class SarifReportFinder {
+    dir;
     constructor(dir) {
         this.dir = dir;
     }
-    getSarifFiles() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dir = this.dir;
-            const promises = [];
-            if (!fs.existsSync(dir)) {
-                throw new Error(`SARIF Finder, path "${dir}", does not exist.`);
+    async getSarifFiles() {
+        const dir = this.dir;
+        const promises = [];
+        if (!fs.existsSync(dir)) {
+            throw new Error(`SARIF Finder, path "${dir}", does not exist.`);
+        }
+        console.log(`SARIF File Finder, processing: ${dir}`);
+        if (fs.lstatSync(dir).isDirectory()) {
+            console.log('  is a directory, looking for files');
+            const files = fs.readdirSync(dir) // TODO use promises here
+                .filter(f => f.endsWith('.sarif'))
+                .map(f => path.resolve(dir, f));
+            console.log(`  SARIF files detected: ${JSON.stringify(files)}`);
+            if (files) {
+                files.forEach(f => {
+                    promises.push(loadFileContents(f));
+                });
             }
-            console.log(`SARIF File Finder, processing: ${dir}`);
-            if (fs.lstatSync(dir).isDirectory()) {
-                console.log('  is a directory, looking for files');
-                const files = fs.readdirSync(dir) // TODO use promises here
-                    .filter(f => f.endsWith('.sarif'))
-                    .map(f => path.resolve(dir, f));
-                console.log(`  SARIF files detected: ${JSON.stringify(files)}`);
-                if (files) {
-                    files.forEach(f => {
-                        promises.push(loadFileContents(f));
-                    });
-                }
-            }
-            if (promises.length > 0) {
-                return yield Promise.all(promises);
-            }
-            else {
-                return yield Promise.resolve([]);
-            }
-        });
+        }
+        if (promises.length > 0) {
+            return await Promise.all(promises);
+        }
+        else {
+            return await Promise.resolve([]);
+        }
     }
 }
 exports["default"] = SarifReportFinder;
-function loadFileContents(file) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const fileHandle = yield fs.promises.open(file, 'r');
-        const content = yield fileHandle.readFile();
-        let data;
-        yield fileHandle.close();
-        try {
-            data = JSON.parse(content.toString('utf8'));
-        }
-        catch (err) {
-            throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`);
-        }
-        return {
-            file,
-            payload: new SarifReport_1.default(data)
-        };
-    });
+async function loadFileContents(file) {
+    const fileHandle = await fs.promises.open(file, 'r');
+    const content = await fileHandle.readFile();
+    let data;
+    await fileHandle.close();
+    try {
+        data = JSON.parse(content.toString('utf8'));
+    }
+    catch (err) {
+        throw new Error(`Failed to parse JSON from SARIF file '${file}': ${err}`);
+    }
+    return {
+        file,
+        payload: new SarifReport_1.default(data)
+    };
 }
 //# sourceMappingURL=SarifReportFinder.js.map
 
@@ -1019,6 +942,7 @@ function loadFileContents(file) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class ReportData {
+    data;
     constructor(data) {
         this.data = data || {};
     }
@@ -1209,7 +1133,6 @@ function generateAlertSummary(open, rules) {
     const result = {};
     let total = 0;
     open.getCodeQLScanningAlerts().forEach(codeScanAlert => {
-        var _a, _b, _c, _d, _e, _f, _g;
         const severity = codeScanAlert.severity;
         const matchedRule = rules ? rules[codeScanAlert.ruleId] : null;
         const summary = {
@@ -1222,9 +1145,9 @@ function generateAlertSummary(open, rules) {
             rule: {
                 id: codeScanAlert.ruleId
             },
-            dismissedBy: (_c = (_b = (_a = codeScanAlert.dismissed) === null || _a === void 0 ? void 0 : _a.by) === null || _b === void 0 ? void 0 : _b.login) !== null && _c !== void 0 ? _c : '',
-            dismissedAt: (_e = (_d = codeScanAlert.dismissed) === null || _d === void 0 ? void 0 : _d.at) !== null && _e !== void 0 ? _e : '',
-            dismissedReason: (_g = (_f = codeScanAlert.dismissed) === null || _f === void 0 ? void 0 : _f.reason) !== null && _g !== void 0 ? _g : ''
+            dismissedBy: codeScanAlert.dismissed?.by?.login ?? '',
+            dismissedAt: codeScanAlert.dismissed?.at ?? '',
+            dismissedReason: codeScanAlert.dismissed?.reason ?? ''
         };
         if (matchedRule) {
             summary.rule.details = matchedRule;
@@ -1323,6 +1246,8 @@ const marked_1 = __nccwpck_require__(5741);
 // Default templates as part of the action
 const EMBEDDED_TEMPLATES = path_1.default.join(__dirname, '..', '..', 'templates');
 class Template {
+    environment;
+    templatesDir;
     constructor(templatesDir) {
         if (!templatesDir) {
             this.templatesDir = EMBEDDED_TEMPLATES;
