@@ -54,7 +54,7 @@
     <div class="row mt-4">
       <dt class="col-sm-2">GitHub Repository:</dt>
       <dd class="col-sm-9">{{ github.owner }}/{{ github.repo }}</dd>
-    
+
       <dt class="col-sm-2">Generated:</dt>
       <dd class="col-sm-9">{{ metadata.created }}</dd>
       </dl>
@@ -81,7 +81,9 @@
     <div style="page-break-before:always">&nbsp;</div>
 
     {% include "components/sast/coverage.html" %}
-    
+
+    <div style="page-break-before:always">&nbsp;</div>
+
     {% if scanning %}
     {% include "components/sast/alerts.html" %}
     {% endif %}

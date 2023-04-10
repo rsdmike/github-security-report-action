@@ -11,22 +11,47 @@
           <h5 class="float-left">Code Scanning Rules Applied</h5>
           <h5><span class="badge badge-light float-right">{{ scanning.rules | length }}</span></h5>
         </div>
+
+        <div class="card-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Rule</th>
+                <!-- <th scope="col">Description</th> -->
+                <th scope="col">Precision</th>
+                <th scope="col">Severity</th>
+                <th scope="col">Tags</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rule in scanning.cwe.rules %}
+              <tr>
+                <td>{{ rule.name }}</td>
+                <!-- <td>{{ rule.description }}</td> -->
+                <td>{{ rule.precision }}</td>
+                <td>{{ rule.severity }}</td>
+                <td>{{ rule.tags }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="col">
-      <div class="card">
-        <div class="card-header">
-          <h5 class="float-left">CWE Coverage</h5>
-          <h5><span class="badge badge-light float-right">{{ scanning.cwe.cwes | length }}</span></h5>
-        </div>
-        <div class="card-body">
-          <div>
-            <ul class="list-inline">
-              {% for cwe in scanning.cwe.cwes | sort %}
-              <li class="text-monospace badge badge-secondary m-1">{{ cwe }}</li>
-              {% endfor %}
-            </ul>
-          </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="float-left">CWE Coverage</h5>
+        <h5><span class="badge badge-light float-right">{{ scanning.cwe.cwes | length }}</span></h5>
+      </div>
+      <div class="card-body">
+        <div>
+          <ul class="list-inline">
+            {% for cwe in scanning.cwe.cwes | sort %}
+            <li class="text-monospace badge badge-secondary m-1">{{ cwe }}</li>
+            {% endfor %}
+          </ul>
         </div>
       </div>
     </div>
