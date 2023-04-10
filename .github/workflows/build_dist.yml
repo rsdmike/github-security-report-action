@@ -25,7 +25,7 @@ jobs:
       - name: Build Executable
         run: npm run build && ncc build lib --source-map
 
-      - uses: EndBug/add-and-commit@v7
+      - uses: EndBug/add-and-commit@v9
         with:
           add: 'dist'
           message: 'dist release 📦 - created via Actions'
