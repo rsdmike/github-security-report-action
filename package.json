@@ -24,7 +24,7 @@
     "puppeteer-core": "^20.9.0"
   },
   "devDependencies": {
-    "@octokit/types": "^9.0.0",
+    "@octokit/types": "^11.1.0",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.01",
     "@types/node": "^20.5.7",
