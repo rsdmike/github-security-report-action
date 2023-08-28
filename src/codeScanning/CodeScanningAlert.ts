@@ -54,7 +54,7 @@ export interface CodeScanningData {
   /**
    * **Required when the state is dismissed.** The reason for dismissing or closing the alert. Can be one of: `false positive`, `won't fix`, and `used in tests`.
    */
-  dismissed_reason: ('false positive' | "won't fix" | 'used in tests') | null
+  dismissed_reason: ('' | 'false positive' | "won't fix" | 'used in tests') | null
   rule: {
     /**
      * A unique identifier for the rule used to detect the alert.
@@ -96,7 +96,7 @@ export interface CodeScanningData {
 
 export interface AlertDismissal {
   at: string
-  reason: 'false positive' | 'won\'t fix' | 'used in tests' | null
+  reason: '' | 'false positive' | 'won\'t fix' | 'used in tests' | null
   by?: {
     login?: string
     type?: string
