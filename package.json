@@ -28,7 +28,7 @@
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.01",
     "@types/node": "^20.5.7",
-    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vercel/ncc": "^0.36.1",
     "chai": "^4.3.7",
