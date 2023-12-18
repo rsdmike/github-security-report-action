@@ -7,7 +7,8 @@ import path from 'path'
 import { configure, type Environment } from 'nunjucks'
 import markdown from 'nunjucks-markdown'
 import { marked } from 'marked'
-
+import { JSDOM } from 'jsdom'
+import DOMPurify from 'dompurify'
 // Default templates as part of the action
 const EMBEDDED_TEMPLATES = path.join(__dirname, '..', '..', 'templates')
 
@@ -26,15 +27,13 @@ export default class Template {
       renderer: new marked.Renderer(),
       gfm: true,
       breaks: false,
-      pedantic: false,
-      sanitize: true,
-      smartLists: true,
-      smartypants: false
+      pedantic: false
     })
 
     this.environment = configure(this.templatesDir, { autoescape: false })
-
-    markdown.register(this.environment, marked.parse)
+    const window = new JSDOM('').window
+    const purify = DOMPurify(window)
+    markdown.register(this.environment, purify.sanitize(marked.parse))
   }
 
   render (data, template): string {
