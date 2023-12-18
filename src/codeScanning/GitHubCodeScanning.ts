@@ -37,7 +37,7 @@ async function getCodeScanning (octokit: Octokit, repo: Repo, state: 'open' | 'f
     state
   }
 
-  const alerts = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts', params)
+  const alerts: CodeScanningData[] = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts' as string, params)
   const results: CodeScanningResults = new CodeScanningResults()
 
   alerts.forEach((alert: CodeScanningData) => {
