@@ -143,7 +143,7 @@ export default class CodeScanningAlert {
         startColumn: this.data.most_recent_instance.location?.start_column ?? 0,
         endColumn: this.data.most_recent_instance.location?.end_column ?? 0
       },
-      message: this.data.most_recent_instance.message?.text ?? ''
+      message: this.data.most_recent_instance.message?.text?.replaceAll('\\n', '</br>') ?? ''
     }
 
     return instanceLocation

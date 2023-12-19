@@ -32,7 +32,7 @@ export default class CodeScanningResults {
     return this.data.filter(value =>
     // TODO this is now reporting CodeQL command-line toolchain as the name of the tool!
     // Need to follow up on this with GHAS team on what to expect in the future.
-       `${value.toolName}`.toLowerCase().startsWith('codeql')
+       `${value.toolName}`.toLowerCase().startsWith('codeql') || `${value.toolName}`.toLowerCase().startsWith('trivy')
     )
   }
 }
