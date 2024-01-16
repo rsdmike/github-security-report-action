@@ -33,7 +33,8 @@ export default class Template {
     this.environment = configure(this.templatesDir, { autoescape: false })
     const window = new JSDOM('').window
     const purify = DOMPurify(window)
-    markdown.register(this.environment, purify.sanitize(marked.parse))
+    const clean = purify.sanitize.bind(purify)
+    markdown.register(this.environment, clean)
   }
 
   render (data, template): string {

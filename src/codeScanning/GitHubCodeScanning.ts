@@ -34,6 +34,7 @@ async function getCodeScanning (octokit: Octokit, repo: Repo, state: 'open' | 'f
   const params: listCodeScanningAlertsParameters = {
     owner: repo.owner,
     repo: repo.repo,
+    // ref: 'refs/pull/1377/merge', for testing
     state
   }
 

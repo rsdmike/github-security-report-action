@@ -41,6 +41,11 @@ function getRules (report: SarifReportData): CodeScanningRule[] | null {
             })
           }
         }
+        // else if (run.tool.driver.name === 'Trivy') {
+        //   if (run.tool.driver.rules && run.tool.driver.rules.length > 0) {
+        //     sarifRules = run.tool.driver.rules
+        //   }
+        // }
       })
     }
   } else {

@@ -32,6 +32,7 @@
         <p class="card-text">
         <p>Location: {{ alert.instance.location.path }}:{{alert.instance.location.startLine}} </p>
         <p>Commit SHA: {{ alert.instance.commitSHA }} </p>
+        <p>Tool: {{alert.tool}}</p>
         <p>Message: {{ alert.instance.message }} </p>
         <p>Description: {{ alert.rule.details.description }}</p>
         <p>Precision: {{ alert.rule.details.precision }}</p>
@@ -41,9 +42,6 @@
         </p>
       </div>
     </div>
-
-
-
     {% endfor %}
     </tbody>
     </table>

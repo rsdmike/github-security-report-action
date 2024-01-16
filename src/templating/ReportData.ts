@@ -274,6 +274,10 @@ function generateAlertSummary (open: CodeScanningResults, rules: CodeScanningRul
 
     if (matchedRule) {
       summary.rule.details = matchedRule
+    } else { // this is for trivy, as the rules for trivy are CVEs not CWEs
+      summary.rule.details = {
+        severity: codeScanAlert.rule.security_severity_level ?? ''
+      } as any
     }
 
     if (!result[severity]) {
