@@ -44,10 +44,11 @@ You can specify a template by using the `template` parameter. Currently the foll
 ## Examples
 
 ```
-name: Generate Security Report
-uses: rsdmike/github-security-report-action@v2
-with:
-  token: ${{ secrets.SECURITY_TOKEN }}
+permissions:
+  security-events: write
+steps:
+- name: Generate Security Report
+  uses: rsdmike/github-security-report-action@v2
 ```
 
 Example summary report output:
