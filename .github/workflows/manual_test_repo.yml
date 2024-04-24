@@ -7,6 +7,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    permissions:
+      security-events:	read
+
     steps:
 
       - name: Harden Runner
@@ -20,7 +23,7 @@ jobs:
       - name: Invoke Action
         uses: ./
         with:
-          token: ${{ secrets.TEST_TOKEN }}
+          token: ${{ github.token }}
           sarifReportDir: ./samples/sarif/java/detailed
           outputDir: .
           repository: octodemo/ghas-reporting
