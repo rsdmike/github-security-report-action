@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      security-events:	read
+      security-events: write
 
     steps:
 
