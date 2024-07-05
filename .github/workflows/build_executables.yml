@@ -41,7 +41,7 @@ jobs:
         run: npm pack
 
       - name: Attach artifact
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
         with:
           name: github-security-report-bundle-${{ matrix.type }}
           path: github-security-report-bundle.zip
