@@ -6,13 +6,16 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --ext .ts",
-    "package": "npm run build && ncc build --no-source-map-register",
+    "package": "npm run build && ncc build",
     "postpack": "tarball=$(npm list - depth 0 | sed 's/@/-/g; s/ .*/.tgz/g; 1q;'); tar -tf $tarball | sed 's/^package\\///' | zip -@r github-security-report-bundle",
-    "test": "mocha --recursive --reporter-option maxDiffSize=16384  -r ts-node/register \"src/**/*.test.ts\""
+    "test": "mocha --node-option no-experimental-strip-types --recursive --reporter-option maxDiffSize=16384 -r ts-node/register \"src/**/*.test.ts\""
   },
   "keywords": [],
   "author": "Peter Murray",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.6.0"
+  },
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/io": "^1.1.3",
@@ -23,7 +26,7 @@
     "marked": "^11.1.0",
     "nunjucks": "^3.2.4",
     "nunjucks-markdown": "^2.0.1",
-    "puppeteer-core": "^21.6.1"
+    "puppeteer-core": "^25.9.0"
   },
   "devDependencies": {
     "@octokit/types": "^12.4.0",
@@ -32,12 +35,12 @@
     "@types/node": "^20.9.2",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
-    "@vercel/ncc": "^0.38.1",
+    "@vercel/ncc": "^0.45.0",
     "chai": "^4.3.8",
     "eslint": "^8.54.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-config-standard-with-typescript": "^40.0.0",
-    "mocha": "^10.2.0",
+    "mocha": "^11.8.0",
     "ts-node": "^10.9.1",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.2.2"

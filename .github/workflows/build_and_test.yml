@@ -12,6 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions: read-all
 
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 24, 26]
+
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@63c24ba6bd7ba022e95695ff85de572c04a18142 # v2.7.0
@@ -21,10 +26,10 @@ jobs:
       - name: Checkout Sources
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
-      - name: Install Node.js
+      - name: Install Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
-          node-version: 18
+          node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
         run: npm ci
@@ -41,5 +46,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
-          name: results
+          name: results-node${{ matrix.node-version }}
           path: _tmp
