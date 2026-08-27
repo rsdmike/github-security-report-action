@@ -6,7 +6,7 @@ import { Octokit } from '@octokit/rest'
 import {
   type RequestParameters
 } from '@octokit/types'
-import { stubObject } from 'ts-sinon'
+import * as sinon from 'sinon'
 import * as fs from 'fs'
 import {
   QUERY_SECURITY_VULNERABILITIES // , QUERY_DEPENDENCY_GRAPH
@@ -42,9 +42,9 @@ export function getGitHubToken (): string {
 }
 
 export function getOctoKit (): Octokit {
-  const mockedOctoKit = stubObject<Octokit>(new Octokit({ auth: 'TOKEN' }))
+  const mockedOctoKit = new Octokit({ auth: 'TOKEN' })
 
-  mockedOctoKit.paginate.callsFake(async (route, params) => {
+  sinon.stub(mockedOctoKit, 'paginate').callsFake(async (route, params) => {
     const parameters: RequestParameters = typeof params === 'string' ? JSON.parse(params) : params
     const responseFile: string = path.join(__dirname, '..', 'samples', 'mocks', 'code-scanning', 'alerts', parameters.owner as string, parameters.repo as string, (parameters.state as string) + '.json')
 
@@ -54,7 +54,7 @@ export function getOctoKit (): Octokit {
       resolve(response)
     })
   })
-  mockedOctoKit.graphql.callsFake(async (request, query, options?) => {
+  sinon.stub(mockedOctoKit, 'graphql').callsFake(async (request, query, options?) => {
     const parameters: RequestParameters = typeof request === 'string' ? JSON.parse(request) : request
 
     const organizationName = parameters.organizationName as string
