@@ -1,0 +1,8 @@
+name: "CodeQL config"
+
+# dist/ is the generated ncc bundle. It is vendored third-party dependency
+# code, not authored source, so findings there are almost always unfixable
+# without patching an upstream package. Dependency risk is covered by the
+# Dependency Review workflow and npm audit instead.
+paths-ignore:
+  - dist
