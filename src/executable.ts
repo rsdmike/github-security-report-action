@@ -8,7 +8,6 @@ import path from 'path'
 
 import { program } from 'commander'
 program.name('github-security-report')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 program.version(require('../package.json').version)
 
 program.requiredOption('-t, --token <token>', 'github access token')
