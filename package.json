@@ -41,5 +41,11 @@
     "ts-node": "^10.9.1",
     "ts-sinon": "^2.0.2",
     "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "mocha": {
+      "diff": "^8.0.4",
+      "serialize-javascript": "^7.1.0"
+    }
   }
 }
