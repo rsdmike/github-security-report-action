@@ -34,7 +34,7 @@ export default class Template {
     const window = new JSDOM('').window
     const purify = DOMPurify(window)
     const clean = purify.sanitize.bind(purify)
-    markdown.register(this.environment, clean)
+    markdown.register(this.environment, (md: string) => clean(marked.parse(md, { async: false })))
   }
 
   render (data, template): string {
