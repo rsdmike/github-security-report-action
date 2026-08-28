@@ -18,8 +18,8 @@
     "node": ">=22.18.0"
   },
   "dependencies": {
-    "@actions/core": "^2.0.3",
-    "@actions/io": "^2.0.0",
+    "@actions/core": "^3.0.1",
+    "@actions/io": "^3.0.2",
     "@octokit/rest": "^20.0.1",
     "commander": "^15.0.0",
     "dompurify": "^3.0.6",
