@@ -20,7 +20,7 @@
   "dependencies": {
     "@actions/core": "^3.0.1",
     "@actions/io": "^3.0.2",
-    "@octokit/rest": "^20.0.1",
+    "@octokit/rest": "^22.0.1",
     "commander": "^15.0.0",
     "dompurify": "^3.0.6",
     "jsdom": "^28.1.0",
@@ -30,7 +30,7 @@
     "puppeteer-core": "^25.9.0"
   },
   "devDependencies": {
-    "@octokit/types": "^12.4.0",
+    "@octokit/types": "^17.0.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.20.1",
