@@ -3,8 +3,8 @@
  **********************************************************************/
 import * as fs from 'fs'
 import { expect } from 'chai'
-import Template from './Template'
-import { getSampleReportJsonDirectory, getTestDirectoryFilePath } from '../testUtils'
+import Template from './Template.ts'
+import { getSampleReportJsonDirectory, getTestDirectoryFilePath } from '../testUtils.ts'
 
 const OCTODEMO_GHAS_REPORTING = {
   directory: 'octodemo/ghas-reporting',

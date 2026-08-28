@@ -1,7 +1,7 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type SarifRule } from './SarifDataTypes'
+import type { SarifRule } from './SarifDataTypes.ts'
 
 const CWE_REGEX = /external\/cwe\/(cwe-.*)/
 

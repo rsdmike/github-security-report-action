@@ -4,8 +4,8 @@
 import { expect } from 'chai'
 import { mkdirP } from '@actions/io'
 import * as fs from 'fs'
-import { createPDF } from './pdfWriter'
-import { getTestDirectoryFilePath } from '../testUtils'
+import { createPDF } from './pdfWriter.ts'
+import { getTestDirectoryFilePath } from '../testUtils.ts'
 
 describe('pdfWriter', function () {
   this.timeout(30 * 1000)

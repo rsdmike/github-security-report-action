@@ -2,11 +2,11 @@
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
 import { expect } from 'chai'
-import GitHubDependencies from './GitHubDependencies'
+import GitHubDependencies from './GitHubDependencies.ts'
 
-import type DependencySet from './DependencySet'
-import type Dependency from './Dependency'
-import { getOctoKit } from '../testUtils'
+import type DependencySet from './DependencySet.ts'
+import type Dependency from './Dependency.ts'
+import { getOctoKit } from '../testUtils.ts'
 
 const mockedOctoKit = getOctoKit()
 

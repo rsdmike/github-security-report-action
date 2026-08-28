@@ -1,7 +1,6 @@
-"use strict";
-exports.id = 849;
-exports.ids = [849];
-exports.modules = {
+export const id = 849;
+export const ids = [849];
+export const modules = {
 
 /***/ 64849:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
@@ -3520,4 +3519,3 @@ const Yargs = YargsFactory(esm/* default */.A);
 /***/ })
 
 };
-;

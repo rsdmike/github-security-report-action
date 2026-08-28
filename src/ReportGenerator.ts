@@ -1,10 +1,10 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type Octokit } from '@octokit/rest'
-import DataCollector from './DataCollector'
-import Template from './templating/Template'
-import { createPDF } from './pdf/pdfWriter'
+import type { Octokit } from '@octokit/rest'
+import DataCollector from './DataCollector.ts'
+import Template from './templating/Template.ts'
+import { createPDF } from './pdf/pdfWriter.ts'
 import * as path from 'path'
 
 import { mkdirP } from '@actions/io'

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import type CodeScanningAlert from './CodeScanningAlert'
+import type CodeScanningAlert from './CodeScanningAlert.ts'
 
 export default class CodeScanningResults {
   private readonly data: CodeScanningAlert[]

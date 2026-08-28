@@ -3,32 +3,32 @@
  **********************************************************************/
 import * as path from 'path'
 import { Octokit } from '@octokit/rest'
-import {
-  type RequestParameters
+import type {
+  RequestParameters
 } from '@octokit/types'
 import * as sinon from 'sinon'
 import * as fs from 'fs'
 import {
   QUERY_SECURITY_VULNERABILITIES // , QUERY_DEPENDENCY_GRAPH
-} from './dependencies/DependencyTypes'
+} from './dependencies/DependencyTypes.ts'
 
 export function getTestDirectoryFilePath (...filePath): string {
-  const args = [__dirname, '..', '_tmp', ...filePath]
+  const args = [import.meta.dirname, '..', '_tmp', ...filePath]
   return path.join(...args)
 }
 
 export function getSampleDataDirectory (...dir): string {
-  const args = [__dirname, '..', 'samples', ...dir]
+  const args = [import.meta.dirname, '..', 'samples', ...dir]
   return path.join(...args)
 }
 
 export function getSampleSarifDirectory (...dir): string {
-  const args = [__dirname, '..', 'samples', 'sarif', ...dir]
+  const args = [import.meta.dirname, '..', 'samples', 'sarif', ...dir]
   return path.join(...args)
 }
 
 export function getSampleReportJsonDirectory (...dir): string {
-  const args = [__dirname, '..', 'samples', 'reportJson', ...dir]
+  const args = [import.meta.dirname, '..', 'samples', 'reportJson', ...dir]
   return path.join(...args)
 }
 
@@ -46,7 +46,7 @@ export function getOctoKit (): Octokit {
 
   sinon.stub(mockedOctoKit, 'paginate').callsFake(async (route, params) => {
     const parameters: RequestParameters = typeof params === 'string' ? JSON.parse(params) : params
-    const responseFile: string = path.join(__dirname, '..', 'samples', 'mocks', 'code-scanning', 'alerts', parameters.owner as string, parameters.repo as string, (parameters.state as string) + '.json')
+    const responseFile: string = path.join(import.meta.dirname, '..', 'samples', 'mocks', 'code-scanning', 'alerts', parameters.owner as string, parameters.repo as string, (parameters.state as string) + '.json')
 
     // Generate response from mock file:
     const response = JSON.parse(fs.readFileSync(responseFile, 'utf8'))
@@ -63,7 +63,7 @@ export function getOctoKit (): Octokit {
     // const isDependecyQuery = parameters.query as string === QUERY_DEPENDENCY_GRAPH
     const queryType = isVulnerabilityQuery ? 'vulnerabilities' : 'dependencies'
 
-    const responseFile = path.join(__dirname, '..', 'samples', 'mocks', 'graphql', organizationName, repositoryName, queryType + '.json')
+    const responseFile = path.join(import.meta.dirname, '..', 'samples', 'mocks', 'graphql', organizationName, repositoryName, queryType + '.json')
 
     // Generate response from mock file:
     const response = JSON.parse(fs.readFileSync(responseFile, 'utf8'))

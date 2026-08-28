@@ -2,8 +2,8 @@
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
 import { expect } from 'chai'
-import ReportGenerator from './ReportGenerator'
-import { getOctoKit, getSampleSarifDirectory, getTestDirectoryFilePath } from './testUtils'
+import ReportGenerator from './ReportGenerator.ts'
+import { getOctoKit, getSampleSarifDirectory, getTestDirectoryFilePath } from './testUtils.ts'
 
 const mockedOctoKit = getOctoKit()
 

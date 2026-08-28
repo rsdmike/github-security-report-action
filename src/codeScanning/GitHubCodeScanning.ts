@@ -1,11 +1,11 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type Octokit } from '@octokit/rest'
-import { type Endpoints } from '@octokit/types'
+import type { Octokit } from '@octokit/rest'
+import type { Endpoints } from '@octokit/types'
 
-import CodeScanningAlert, { type CodeScanningData } from './CodeScanningAlert'
-import CodeScanningResults from './CodeScanningResults'
+import CodeScanningAlert, { type CodeScanningData } from './CodeScanningAlert.ts'
+import CodeScanningResults from './CodeScanningResults.ts'
 
 type listCodeScanningAlertsParameters = Endpoints['GET /repos/{owner}/{repo}/code-scanning/alerts']['parameters']
 
