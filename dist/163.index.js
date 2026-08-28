@@ -1,7 +1,6 @@
-"use strict";
-exports.id = 163;
-exports.ids = [163];
-exports.modules = {
+export const id = 163;
+export const ids = [163];
+export const modules = {
 
 /***/ 97163:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
@@ -29,4 +28,3 @@ const applyExtends = (config, cwd, mergeExtends) => {
 /***/ })
 
 };
-;

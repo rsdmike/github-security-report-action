@@ -1,18 +1,18 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type Octokit } from '@octokit/rest'
-import { type RequestHeaders, type RequestParameters } from '@octokit/types'
+import type { Octokit } from '@octokit/rest'
+import type { RequestHeaders, RequestParameters } from '@octokit/types'
 
 import {
   QUERY_SECURITY_VULNERABILITIES,
   QUERY_DEPENDENCY_GRAPH,
   type VulnerabilityAlert,
   type DependencySetData, type RepositoryVulnerabilityAlerts, type DependencyGraphResult
-} from './DependencyTypes'
+} from './DependencyTypes.ts'
 
-import Vulnerability from './Vulnerability'
-import DependencySet from './DependencySet'
+import Vulnerability from './Vulnerability.ts'
+import DependencySet from './DependencySet.ts'
 
 interface Repo {
   owner: string

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type DependencySetDependencyData } from './DependencyTypes'
+import type { DependencySetDependencyData } from './DependencyTypes.ts'
 
 export default class Dependency {
   private readonly data: DependencySetDependencyData

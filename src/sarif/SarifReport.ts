@@ -1,8 +1,8 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import CodeScanningRule from './CodeScanningRule'
-import { type SarifReportData, type SarifRule } from './SarifDataTypes'
+import CodeScanningRule from './CodeScanningRule.ts'
+import type { SarifReportData, SarifRule } from './SarifDataTypes.ts'
 
 export default class SarifReport {
   private readonly data: SarifReportData

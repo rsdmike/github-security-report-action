@@ -1,21 +1,21 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import type Vulnerability from '../dependencies/Vulnerability'
-import type DependencySet from '../dependencies/DependencySet'
-import { type SarifFile } from '../sarif/SarifReportFinder'
-import type CodeScanningResults from '../codeScanning/CodeScanningResults'
-import type CodeScanningRule from '../sarif/CodeScanningRule'
-import {
-  type AlertSummary, type AggregatedAlertSummary,
-  type CodeScanningRules, type CodeScanResults, type CodeScanSummary,
-  type CollectedData,
-  type CWECoverage, type Dependencies,
-  type DependencySummary,
-  type JsonPayload, type Manifest,
-  type Repo,
-  type RuleData, type ServerityToVulnerabilities, type SeverityToAlertSummary, type SeverityToAggregatedAlertSummary
-} from './ReportTypes'
+import type Vulnerability from '../dependencies/Vulnerability.ts'
+import type DependencySet from '../dependencies/DependencySet.ts'
+import type { SarifFile } from '../sarif/SarifReportFinder.ts'
+import type CodeScanningResults from '../codeScanning/CodeScanningResults.ts'
+import type CodeScanningRule from '../sarif/CodeScanningRule.ts'
+import type {
+  AlertSummary, AggregatedAlertSummary,
+  CodeScanningRules, CodeScanResults, CodeScanSummary,
+  CollectedData,
+  CWECoverage, Dependencies,
+  DependencySummary,
+  JsonPayload, Manifest,
+  Repo,
+  RuleData, ServerityToVulnerabilities, SeverityToAlertSummary, SeverityToAggregatedAlertSummary
+} from './ReportTypes.ts'
 
 export default class ReportData {
   private readonly data: CollectedData

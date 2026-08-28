@@ -1,6 +1,6 @@
-exports.id = 371;
-exports.ids = [371];
-exports.modules = {
+export const id = 371;
+export const ids = [371];
+export const modules = {
 
 /***/ 83371:
 /***/ ((module) => {
@@ -11,4 +11,3 @@ module.exports = eval("require")("proxy-agent");
 /***/ })
 
 };
-;

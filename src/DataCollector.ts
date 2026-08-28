@@ -1,12 +1,12 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type Octokit } from '@octokit/rest'
-import GitHubCodeScanning from './codeScanning/GitHubCodeScanning'
-import GitHubDependencies from './dependencies/GitHubDependencies'
-import SarifReportFinder from './sarif/SarifReportFinder'
-import ReportData from './templating/ReportData'
-import { type CollectedData } from './templating/ReportTypes'
+import type { Octokit } from '@octokit/rest'
+import GitHubCodeScanning from './codeScanning/GitHubCodeScanning.ts'
+import GitHubDependencies from './dependencies/GitHubDependencies.ts'
+import SarifReportFinder from './sarif/SarifReportFinder.ts'
+import ReportData from './templating/ReportData.ts'
+import type { CollectedData } from './templating/ReportTypes.ts'
 
 interface Repo {
   owner: string

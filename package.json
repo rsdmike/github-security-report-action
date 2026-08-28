@@ -3,18 +3,19 @@
   "version": "4.0.0",
   "description": "Generates a report from GitHub CodeQL and Dependency information",
   "main": "lib/index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
     "package": "npm run build && ncc build",
     "postpack": "tarball=$(npm list - depth 0 | sed 's/@/-/g; s/ .*/.tgz/g; 1q;'); tar -tf $tarball | sed 's/^package\\///' | zip -@r github-security-report-bundle",
-    "test": "mocha --node-option no-experimental-strip-types --recursive --reporter-option maxDiffSize=16384 -r ts-node/register \"src/**/*.test.ts\""
+    "test": "mocha --recursive --reporter-option maxDiffSize=16384 --extension ts \"src/**/*.test.ts\""
   },
   "keywords": [],
   "author": "Peter Murray",
   "license": "MIT",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "dependencies": {
     "@actions/core": "^2.0.3",
@@ -40,8 +41,7 @@
     "mocha": "^11.8.0",
     "neostandard": "^0.13.0",
     "sinon": "^22.1.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "overrides": {
     "mocha": {

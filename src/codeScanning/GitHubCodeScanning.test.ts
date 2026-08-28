@@ -2,8 +2,8 @@
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
 import { expect } from 'chai'
-import GitHubCodeScanning from './GitHubCodeScanning'
-import { getOctoKit } from '../testUtils'
+import GitHubCodeScanning from './GitHubCodeScanning.ts'
+import { getOctoKit } from '../testUtils.ts'
 
 const mockedOctoKit = getOctoKit()
 

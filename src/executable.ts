@@ -1,12 +1,16 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import ReportGenerator, { type ReportGeneratorConfig } from './ReportGenerator'
+import ReportGenerator, { type ReportGeneratorConfig } from './ReportGenerator.ts'
 import { Octokit } from '@octokit/rest'
 
 import path from 'path'
+import { createRequire } from 'module'
 
 import { program } from 'commander'
+
+const require = createRequire(import.meta.url)
+
 program.name('github-security-report')
 program.version(require('../package.json').version)
 

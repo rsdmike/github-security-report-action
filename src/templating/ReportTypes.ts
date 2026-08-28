@@ -1,12 +1,12 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import type CodeScanningRule from '../sarif/CodeScanningRule'
-import type Vulnerability from '../dependencies/Vulnerability'
-import type DependencySet from '../dependencies/DependencySet'
-import { type SarifFile } from '../sarif/SarifReportFinder'
-import type CodeScanningResults from '../codeScanning/CodeScanningResults'
-import { type AlertInstanceLocation } from '../codeScanning/CodeScanningAlert'
+import type CodeScanningRule from '../sarif/CodeScanningRule.ts'
+import type Vulnerability from '../dependencies/Vulnerability.ts'
+import type DependencySet from '../dependencies/DependencySet.ts'
+import type { SarifFile } from '../sarif/SarifReportFinder.ts'
+import type CodeScanningResults from '../codeScanning/CodeScanningResults.ts'
+import type { AlertInstanceLocation } from '../codeScanning/CodeScanningAlert.ts'
 
 export interface RuleData {
   name: string
