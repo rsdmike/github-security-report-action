@@ -40,7 +40,7 @@ function readSampleFileAsJson (subDir, file): any {
 describe('Template markdown rendering', () => {
   const markdownTemplates = getSampleDataDirectory('templates')
 
-  it('should convert markdown in a {% markdown %} block into HTML', () => {
+  it('should convert markdown into HTML via the markdown filter', () => {
     const content = '# Heading\n\nSome **bold** text and a [link](https://example.com).\n\n- item one\n- item two'
     const result = new Template(markdownTemplates).render({ content }, 'markdown_block')
 
