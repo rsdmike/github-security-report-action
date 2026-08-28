@@ -5,7 +5,6 @@ import * as fs from 'fs'
 
 import path from 'path'
 import nunjucks, { type Environment } from 'nunjucks'
-import markdown from 'nunjucks-markdown'
 import { marked } from 'marked'
 import { JSDOM } from 'jsdom'
 import DOMPurify from 'dompurify'
@@ -34,7 +33,7 @@ export default class Template {
     const window = new JSDOM('').window
     const purify = DOMPurify(window)
     const clean = purify.sanitize.bind(purify)
-    markdown.register(this.environment, (md: string) => clean(marked.parse(md, { async: false })))
+    this.environment.addFilter('markdown', (md?: string) => clean(marked.parse(md ?? '', { async: false })))
   }
 
   render (data, template): string {

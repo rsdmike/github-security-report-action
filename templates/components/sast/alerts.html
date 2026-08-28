@@ -38,7 +38,7 @@
         <p>Precision: {{ alert.rule.details.precision }}</p>
         <p>Severity: {{ alert.rule.details.severity }}</p>
         <span class="badge badge-secondary">{{ alert.rule.details.cwes }}</span>
-        {{ markdownR(alert.rule.details.sarifRule.help.markdown ) | safe }}
+        {{ alert.rule.details.sarifRule.help.markdown | markdown | safe }}
         </p>
       </div>
     </div>
@@ -52,11 +52,6 @@
 {% endif %}
 
 {% endif %}
-{% endmacro %}
-{% macro markdownR(markdownContent) %}
-{% markdown %}
-{{ markdownContent }}
-{% endmarkdown %}
 {% endmacro %}
 
 <div class="col mb-4">
