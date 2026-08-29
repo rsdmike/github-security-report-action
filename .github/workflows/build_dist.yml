@@ -30,6 +30,9 @@ jobs:
       - name: Build Executable
         run: npm run package
 
+      - name: Verify Bundle Loads
+        run: npm run test:dist
+
       - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:
           add: 'dist'
