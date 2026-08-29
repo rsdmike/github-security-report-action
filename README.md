@@ -37,8 +37,10 @@ additional templates by creating HTML templates using [Nunjucks](https://mozilla
 
 You can specify a template by using the `template` parameter. Currently the following templates are available:
 * `summary`: The classic summary report from previous versions.
-* `report`: A more detailed report that includes a list of open alerts broken down by their severity.
-* `report_sca`: A report that includes Software Composition Analysis
+* `report`: A more detailed report covering dependencies (Software Composition Analysis) and code
+  scanning, ending with each open code scanning alert listed individually under its severity.
+* `aggregated_report`: The same content as `report`, except the open code scanning alerts are
+  grouped by rule - with an instance count per rule - rather than listed individually.
 
 
 ## Examples

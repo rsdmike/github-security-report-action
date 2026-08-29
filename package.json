@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
-    "package": "npm run build && ncc build",
+    "package": "npm run build && ncc build && node scripts/copy-templates.mjs",
     "test:dist": "node scripts/verify-dist.mjs",
     "postpack": "tarball=$(npm list - depth 0 | sed 's/@/-/g; s/ .*/.tgz/g; 1q;'); tar -tf $tarball | sed 's/^package\\///' | zip -@r github-security-report-bundle",
     "test": "mocha --recursive --reporter-option maxDiffSize=16384 --extension ts \"src/**/*.test.ts\""
