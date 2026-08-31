@@ -69,19 +69,20 @@ export function getOctoKit (): Octokit {
     }
 
     if (path_.includes('/dependency-graph/sbom/fetch-report/')) {
-      const matched = /repos\/([^/]+)\/([^/]+)\/dependency-graph/.exec(path_)
-      const slug = `${matched?.[1] as string}/${matched?.[2] as string}`
+      const owner = parameters.owner as string
+      const repo = parameters.repo as string
+      const slug = `${owner}/${repo}`
 
       const attempts = (sbomPollCounts.get(slug) ?? 0) + 1
       sbomPollCounts.set(slug, attempts)
 
       // First poll: report still being generated. Simulated only for the repo whose
       // tests exercise the polling flow directly (and override the poll interval).
-      if (attempts === 1 && matched?.[2] === 'demo-vulnerabilities-ghas') {
+      if (attempts === 1 && repo === 'demo-vulnerabilities-ghas') {
         return { status: 202, data: undefined } as any
       }
 
-      const responseFile = path.join(import.meta.dirname, '..', 'samples', 'mocks', 'rest', matched?.[1] as string, matched?.[2] as string, 'sbom.json')
+      const responseFile = path.join(import.meta.dirname, '..', 'samples', 'mocks', 'rest', owner, repo, 'sbom.json')
       const document = JSON.parse(fs.readFileSync(responseFile, 'utf8'))
       // The asynchronous endpoint returns the SPDX document without the `sbom` wrapper.
       return { status: 200, data: document.sbom ?? document } as any

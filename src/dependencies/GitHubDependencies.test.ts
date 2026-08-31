@@ -156,6 +156,26 @@ describe('GitHubDependencies', function () {
       expect(raised?.message).to.contain('no package list')
     })
 
+    it('raises when generate-report returns an sbom_url it cannot read a report id from', async () => {
+      const badUrl = new Octokit({ auth: 'TOKEN' })
+      sinon.stub(badUrl, 'request').callsFake(async (route) => {
+        if (String(route).includes('generate-report')) {
+          return { status: 201, data: { sbom_url: 'https://example.invalid/nope' } } as any
+        }
+        throw new Error('should not have polled')
+      })
+
+      let raised: Error | null = null
+      try {
+        await new GitHubDependencies(badUrl).getSbomDependencies(testRepo)
+      } catch (err: any) {
+        raised = err
+      }
+
+      expect(raised).to.not.equal(null)
+      expect(raised?.message).to.contain('Could not read a report id')
+    })
+
     it('excludes the repository self-package', async () => {
       const results: Dependency[] = await ghDeps.getSbomDependencies(testRepo, { pollIntervalMs: 1 })
 
