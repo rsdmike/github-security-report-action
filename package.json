@@ -1,6 +1,6 @@
 {
   "name": "github-security-report",
-  "version": "4.0.1",
+  "version": "4.1.0",
   "description": "Generates a report from GitHub CodeQL and Dependency information",
   "main": "lib/index.js",
   "type": "module",
