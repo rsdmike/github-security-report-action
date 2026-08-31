@@ -1,12 +1,12 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import { type Octokit } from '@octokit/rest'
-import GitHubCodeScanning from './codeScanning/GitHubCodeScanning'
-import GitHubDependencies from './dependencies/GitHubDependencies'
-import SarifReportFinder from './sarif/SarifReportFinder'
-import ReportData from './templating/ReportData'
-import { type CollectedData } from './templating/ReportTypes'
+import type { Octokit } from '@octokit/rest'
+import GitHubCodeScanning from './codeScanning/GitHubCodeScanning.ts'
+import GitHubDependencies from './dependencies/GitHubDependencies.ts'
+import SarifReportFinder from './sarif/SarifReportFinder.ts'
+import ReportData from './templating/ReportData.ts'
+import type { CollectedData } from './templating/ReportTypes.ts'
 
 interface Repo {
   owner: string
@@ -45,7 +45,8 @@ export default class DataCollector {
       ghDeps.getAllDependencies(this.repo),
       ghDeps.getAllVulnerabilities(this.repo),
       codeScanning.getOpenCodeScanningAlerts(this.repo),
-      codeScanning.getClosedCodeScanningAlerts(this.repo)
+      codeScanning.getClosedCodeScanningAlerts(this.repo),
+      ghDeps.getSbomDependencies(this.repo)
     ])
 
     const data: CollectedData = {
@@ -54,7 +55,8 @@ export default class DataCollector {
       dependencies: results[1],
       vulnerabilities: results[2],
       codeScanningOpen: results[3],
-      codeScanningClosed: results[4]
+      codeScanningClosed: results[4],
+      sbomDependencies: results[5]
     }
 
     return new ReportData(data)

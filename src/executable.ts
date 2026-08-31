@@ -1,14 +1,17 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import ReportGenerator, { type ReportGeneratorConfig } from './ReportGenerator'
+import ReportGenerator, { type ReportGeneratorConfig } from './ReportGenerator.ts'
 import { Octokit } from '@octokit/rest'
 
 import path from 'path'
+import { createRequire } from 'module'
 
 import { program } from 'commander'
+
+const require = createRequire(import.meta.url)
+
 program.name('github-security-report')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 program.version(require('../package.json').version)
 
 program.requiredOption('-t, --token <token>', 'github access token')

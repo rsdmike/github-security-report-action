@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": true,
@@ -12,6 +15,6 @@
     "forceConsistentCasingInFileNames": true
   },
   "exclude": [
-    "node_modules",
+    "node_modules"
   ]
 }

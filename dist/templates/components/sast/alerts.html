@@ -32,18 +32,16 @@
         <p class="card-text">
         <p>Location: {{ alert.instance.location.path }}:{{alert.instance.location.startLine}} </p>
         <p>Commit SHA: {{ alert.instance.commitSHA }} </p>
+        <p>Tool: {{alert.tool}}</p>
         <p>Message: {{ alert.instance.message }} </p>
         <p>Description: {{ alert.rule.details.description }}</p>
         <p>Precision: {{ alert.rule.details.precision }}</p>
         <p>Severity: {{ alert.rule.details.severity }}</p>
         <span class="badge badge-secondary">{{ alert.rule.details.cwes }}</span>
-        {{ markdownR(alert.rule.details.sarifRule.help.markdown ) | safe }}
+        {{ alert.rule.details.sarifRule.help.markdown | markdown | safe }}
         </p>
       </div>
     </div>
-
-
-
     {% endfor %}
     </tbody>
     </table>
@@ -54,11 +52,6 @@
 {% endif %}
 
 {% endif %}
-{% endmacro %}
-{% macro markdownR(markdownContent) %}
-{% markdown %}
-{{ markdownContent }}
-{% endmarkdown %}
 {% endmacro %}
 
 <div class="col mb-4">

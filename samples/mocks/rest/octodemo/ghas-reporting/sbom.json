@@ -1,0 +1,32 @@
+{
+    "sbom": {
+        "spdxVersion": "SPDX-2.3",
+        "name": "com.github/octodemo/ghas-reporting",
+        "packages": [
+            {
+                "name": "octodemo/ghas-reporting",
+                "SPDXID": "SPDXRef-github-octodemo-ghas-reporting",
+                "versionInfo": "",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:github/octodemo/ghas-reporting"
+                    }
+                ]
+            },
+            {
+                "name": "org.apache.struts:struts2-core",
+                "SPDXID": "SPDXRef-maven-org.apache.struts-struts2-core",
+                "versionInfo": "2.5.20",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:maven/org.apache.struts/struts2-core@2.5.20"
+                    }
+                ]
+            }
+        ]
+    }
+}

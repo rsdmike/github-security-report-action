@@ -37,15 +37,17 @@ additional templates by creating HTML templates using [Nunjucks](https://mozilla
 
 You can specify a template by using the `template` parameter. Currently the following templates are available:
 * `summary`: The classic summary report from previous versions.
-* `report`: A more detailed report that includes a list of open alerts broken down by their severity.
-* `report_sca`: A report that includes Software Composition Analysis
+* `report`: A more detailed report covering dependencies (Software Composition Analysis) and code
+  scanning, ending with each open code scanning alert listed individually under its severity.
+* `aggregated_report`: The same content as `report`, except the open code scanning alerts are
+  grouped by rule - with an instance count per rule - rather than listed individually.
 
 
 ## Examples
 
 ```
 name: Generate Security Report
-uses: rsdmike/github-security-report-action@v2
+uses: rsdmike/github-security-report-action@v4
 with:
   token: ${{ secrets.SECURITY_TOKEN }}
 ```
@@ -55,24 +57,32 @@ Example summary report output:
 
 
 
-### Installation
-Just download and extract the zip bundle for your target platform. Inside there is a file starting with `github-security-report` with a target platform suffix or .exe extension in the case of Windows.
+## Command line usage
 
-### Running
-Just call the platform executable and pass in the arguments as required. The arguments are the same as that of the GitHub Action, and you can get the full details from invoking the `--help` option on the executable as it will output detailed help
+The report generator can also be run directly from a clone of this repository,
+using the same options as the Action.
+
+```
+$ npm install
+$ npm run build
+$ node lib/executable.js --help
+```
 
 Options:
 * `-t`, `--token`: The GitHub Personal Access Token that has the necessary access for security and dependency API endpoints.
 * `-r`, `--repository`: The repository that contains the source code, in `<owner>/<repository_name>` form, e.g. `peter-murray/node-hue-api`
-* `-s`, `--sarif-directory`: The directory containing the SARIF report files
-* `-o`, `--output-directory`: The directory to output the PDF report to. This will be created if it does not exist.
+* `-s`, `--sarif-directory`: The directory containing the SARIF report files. Defaults to `../results`.
+* `-o`, `--output-directory`: The directory to output the PDF report to. This will be created if it does not exist. Defaults to the current directory.
 * `--template`: The report template type used to render the report. This defaults to `summary`.
+* `--github-api-url`: The GitHub API URL, for GitHub Enterprise Server. Defaults to `https://api.github.com`.
 
-An example of running the MacOS command line executable from the un:
+For example:
 ```
-$ ./github-security-report-mac-x64 -t <GitHub PAT Token> -r peter-murray/node-hue-api -s <directory containing CodeQL SARIF file(s)>
+$ node lib/executable.js -t <GitHub PAT Token> -r peter-murray/node-hue-api -s <directory containing CodeQL SARIF file(s)>
 ```
 The above command would output a `summary.pdf` file in the current working directory.
+
+Requires Node >= 22.12.0.
 
 ## Future improvements
 

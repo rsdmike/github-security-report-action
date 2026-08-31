@@ -22,13 +22,16 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
-          node-version: 18
+          node-version: 26
 
       - name: Install Dependencies
-        run: npm ci && npm i -g @vercel/ncc
+        run: npm ci
 
       - name: Build Executable
-        run: npm run build && ncc build lib --source-map
+        run: npm run package
+
+      - name: Verify Bundle Loads
+        run: npm run test:dist
 
       - uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
         with:

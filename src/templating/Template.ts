@@ -4,13 +4,12 @@
 import * as fs from 'fs'
 
 import path from 'path'
-import { configure, type Environment } from 'nunjucks'
-import markdown from 'nunjucks-markdown'
+import nunjucks, { type Environment } from 'nunjucks'
 import { marked } from 'marked'
 import { JSDOM } from 'jsdom'
 import DOMPurify from 'dompurify'
 // Default templates as part of the action
-const EMBEDDED_TEMPLATES = path.join(__dirname, '..', '..', 'templates')
+const EMBEDDED_TEMPLATES = path.join(import.meta.dirname, '..', '..', 'templates')
 
 export default class Template {
   private readonly environment: Environment
@@ -30,11 +29,11 @@ export default class Template {
       pedantic: false
     })
 
-    this.environment = configure(this.templatesDir, { autoescape: false })
+    this.environment = nunjucks.configure(this.templatesDir, { autoescape: false })
     const window = new JSDOM('').window
     const purify = DOMPurify(window)
     const clean = purify.sanitize.bind(purify)
-    markdown.register(this.environment, clean)
+    this.environment.addFilter('markdown', (md?: string) => clean(marked.parse(md ?? '', { async: false })))
   }
 
   render (data, template): string {

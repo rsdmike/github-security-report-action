@@ -1,7 +1,7 @@
 /*********************************************************************
  * Copyright (c) Intel Corporation 2023
  **********************************************************************/
-import ReportGenerator from './ReportGenerator'
+import ReportGenerator from './ReportGenerator.ts'
 
 import * as core from '@actions/core'
 import { Octokit } from '@octokit/rest'
@@ -19,7 +19,7 @@ async function run (): Promise<void> {
       outputDirectory: getRequiredInputValue('outputDir'),
 
       templating: {
-        directory: path.join(__dirname, 'templates'),
+        directory: path.join(import.meta.dirname, 'templates'),
         name: getRequiredInputValue('template')
       }
     })

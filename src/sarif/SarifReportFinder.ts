@@ -3,8 +3,8 @@
  **********************************************************************/
 import * as path from 'path'
 import * as fs from 'fs'
-import SarifReport from './SarifReport'
-import { type SarifReportData } from './SarifDataTypes'
+import SarifReport from './SarifReport.ts'
+import type { SarifReportData } from './SarifDataTypes.ts'
 
 export interface SarifFile {
   file: string

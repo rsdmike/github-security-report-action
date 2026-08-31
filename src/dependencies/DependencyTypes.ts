@@ -106,6 +106,12 @@ export interface SecurityAdvisory {
   publishedAt: string
 }
 
+// NOTE: This query deliberately does NOT request the nested `dependencies` connection
+// (nor `dependenciesCount`, which GitHub only resolves as a side effect of it).
+// Resolving that connection forces GitHub to expand every manifest's dependency graph,
+// which exceeds the server-side GraphQL budget on repositories with a large lockfile and
+// fails the whole query with `{"errors":[{"message":"timedout"}]}`. The actual dependency
+// list is retrieved from the dependency-graph SBOM REST endpoint instead.
 export const QUERY_DEPENDENCY_GRAPH = `
 query ($organizationName: String!, $repositoryName: String!, $cursor: String){
   repository(owner: $organizationName name: $repositoryName) {
@@ -119,19 +125,9 @@ query ($organizationName: String!, $repositoryName: String!, $cursor: String){
       edges {
         node {
           filename
-          dependenciesCount
           blobPath
           exceedsMaxSize
           parseable
-          dependencies{
-            edges {
-              node {
-                packageName
-                packageManager
-                requirements
-              }
-            }
-          }
         }
       }
     }
@@ -156,13 +152,9 @@ export interface DependencyGraphResult {
 export interface DependencySetData {
   node: {
     filename: string
-    dependenciesCount: number
     blobPath: string
     exceedsMaxSize: boolean
     parseable: boolean
-    dependencies: {
-      edges: DependencySetDependencyData []
-    }
   }
 }
 
@@ -172,4 +164,28 @@ export interface DependencySetDependencyData {
     packageManager: string
     requirements: string
   }
+}
+
+/**
+ * Minimal SPDX shape of the GitHub dependency-graph SBOM REST response.
+ *
+ * The asynchronous fetch-report endpoint returns the SPDX document directly, while the
+ * deprecated synchronous endpoint nests it under `sbom`; both are accepted.
+ */
+export interface SbomResponse {
+  sbom?: {
+    packages?: SbomPackage[]
+  }
+  packages?: SbomPackage[]
+}
+
+export interface SbomPackage {
+  name: string
+  SPDXID?: string
+  versionInfo?: string
+  externalRefs?: Array<{
+    referenceCategory?: string
+    referenceType?: string
+    referenceLocator?: string
+  }>
 }
