@@ -1,0 +1,61 @@
+{
+    "sbom": {
+        "spdxVersion": "SPDX-2.3",
+        "name": "com.github/octodemo/demo-vulnerabilities-ghas",
+        "packages": [
+            {
+                "name": "octodemo/demo-vulnerabilities-ghas",
+                "SPDXID": "SPDXRef-github-octodemo-demo-vulnerabilities-ghas",
+                "versionInfo": "",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:github/octodemo/demo-vulnerabilities-ghas"
+                    }
+                ]
+            },
+            {
+                "name": "org.apache.struts:struts2-core",
+                "SPDXID": "SPDXRef-maven-org.apache.struts-struts2-core",
+                "versionInfo": "2.5.20",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:maven/org.apache.struts/struts2-core@2.5.20"
+                    }
+                ]
+            },
+            {
+                "name": "com.fasterxml.jackson.core:jackson-databind",
+                "SPDXID": "SPDXRef-maven-com.fasterxml.jackson.core-jackson-databind",
+                "versionInfo": "2.9.8",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.8"
+                    }
+                ]
+            },
+            {
+                "name": "lru-cache",
+                "SPDXID": "SPDXRef-npm-lru-cache",
+                "versionInfo": "11.5.1",
+                "externalRefs": [
+                    {
+                        "referenceCategory": "PACKAGE-MANAGER",
+                        "referenceType": "purl",
+                        "referenceLocator": "pkg:npm/lru-cache@11.5.1"
+                    }
+                ]
+            },
+            {
+                "name": "mystery-package",
+                "SPDXID": "SPDXRef-mystery-package",
+                "versionInfo": "1.0.0"
+            }
+        ]
+    }
+}
