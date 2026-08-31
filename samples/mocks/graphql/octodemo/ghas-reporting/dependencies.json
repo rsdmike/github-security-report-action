@@ -11,21 +11,9 @@
                 {
                     "node": {
                         "filename": "",
-                        "dependenciesCount": 1,
                         "blobPath": "",
                         "exceedsMaxSize": false,
-                        "parseable": true,
-                        "dependencies": {
-                            "edges": [
-                                {
-                                    "node": {
-                                        "packageName": "",
-                                        "packageManager": "MAVEN",
-                                        "requirements": ""
-                                    }
-                                }
-                            ]
-                        }
+                        "parseable": true
                     }
                 }
             ]

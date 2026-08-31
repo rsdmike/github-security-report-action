@@ -284725,6 +284725,12 @@ query users($organizationName: String!, $repositoryName: String!, $cursor: Strin
   }
 }
 `;
+// NOTE: This query deliberately does NOT request the nested `dependencies` connection
+// (nor `dependenciesCount`, which GitHub only resolves as a side effect of it).
+// Resolving that connection forces GitHub to expand every manifest's dependency graph,
+// which exceeds the server-side GraphQL budget on repositories with a large lockfile and
+// fails the whole query with `{"errors":[{"message":"timedout"}]}`. The actual dependency
+// list is retrieved from the dependency-graph SBOM REST endpoint instead.
 const QUERY_DEPENDENCY_GRAPH = `
 query ($organizationName: String!, $repositoryName: String!, $cursor: String){
   repository(owner: $organizationName name: $repositoryName) {
@@ -284738,19 +284744,9 @@ query ($organizationName: String!, $repositoryName: String!, $cursor: String){
       edges {
         node {
           filename
-          dependenciesCount
           blobPath
           exceedsMaxSize
           parseable
-          dependencies{
-            edges {
-              node {
-                packageName
-                packageManager
-                requirements
-              }
-            }
-          }
         }
       }
     }
@@ -284808,27 +284804,50 @@ class Vulnerability {
 }
 //# sourceMappingURL=Vulnerability.js.map
 ;// CONCATENATED MODULE: ./lib/dependencies/Dependency.js
+/**
+ * A single resolved dependency, sourced from the repository's dependency-graph SBOM.
+ */
 class Dependency {
-    data;
-    constructor(data) {
-        this.data = data;
+    name;
+    packageType;
+    version;
+    constructor(name, packageType, version) {
+        this.name = name;
+        this.packageType = packageType;
+        this.version = version;
     }
-    get name() {
-        return this.data.node.packageName;
+    /**
+     * Builds a Dependency from an SPDX package entry.
+     *
+     * The package manager is taken from the purl external reference
+     * (`pkg:npm/lru-cache@11.5.1` -> `npm`), falling back to `unknown` when a package
+     * carries no parseable purl.
+     */
+    static fromSbomPackage(pkg) {
+        return new Dependency(pkg.name, getPackageManager(pkg), pkg.versionInfo ?? '');
     }
-    get packageType() {
-        return this.data.node.packageManager;
-    }
-    get version() {
-        return this.data.node.requirements;
-    }
+}
+const PURL_PATTERN = /^pkg:([^/]+)\//;
+function getPackageManager(pkg) {
+    const purl = pkg.externalRefs?.find(ref => ref.referenceType === 'purl')?.referenceLocator;
+    const matched = purl ? PURL_PATTERN.exec(purl) : null;
+    return matched ? matched[1] : 'unknown';
+}
+/**
+ * The SBOM describes the repository itself as a `pkg:github/...` package. It is not a
+ * dependency of the repository, so it is excluded from the reported dependency list.
+ */
+function isRepositorySelfPackage(pkg) {
+    return getPackageManager(pkg) === 'github';
 }
 //# sourceMappingURL=Dependency.js.map
 ;// CONCATENATED MODULE: ./lib/dependencies/DependencySet.js
-/*********************************************************************
- * Copyright (c) Intel Corporation 2023
- **********************************************************************/
-
+/**
+ * A dependency manifest detected by GitHub's dependency graph.
+ *
+ * This carries manifest metadata only. The dependencies themselves are collected
+ * separately from the SBOM REST endpoint -- see the note on QUERY_DEPENDENCY_GRAPH.
+ */
 class DependencySet {
     data;
     constructor(data) {
@@ -284836,9 +284855,6 @@ class DependencySet {
     }
     get filename() {
         return this.data.node.filename;
-    }
-    get count() {
-        return this.data.node.dependenciesCount || 0;
     }
     get path() {
         return this.data.node.blobPath;
@@ -284852,19 +284868,18 @@ class DependencySet {
     get exceededMaxSize() {
         return this.data.node.exceedsMaxSize;
     }
-    get dependencies() {
-        const deps = this.data.node.dependencies.edges;
-        if (deps) {
-            return deps.map(dep => new Dependency(dep));
-        }
-        return [];
-    }
 }
 //# sourceMappingURL=DependencySet.js.map
 ;// CONCATENATED MODULE: ./lib/dependencies/GitHubDependencies.js
 
 
 
+
+const DEFAULT_SBOM_TIMEOUT_MS = 60_000;
+const DEFAULT_SBOM_POLL_INTERVAL_MS = 2_000;
+async function delay(ms) {
+    await new Promise(resolve => setTimeout(resolve, ms));
+}
 class GitHubDependencies {
     octokit;
     constructor(octokit) {
@@ -284877,12 +284892,86 @@ class GitHubDependencies {
         const data = await this.getPaginatedQuery(QUERY_SECURITY_VULNERABILITIES, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.vulnerabilityAlerts.pageInfo', extractVulnerabilityAlerts);
         return data.map(val => new Vulnerability(val));
     }
+    /**
+     * Returns metadata for every dependency manifest GitHub has detected for the repository.
+     * This does not include the dependencies themselves -- see getSbomDependencies().
+     */
     async getAllDependencies(repo) {
         function extractDependencySetData(data) {
             return data.repository.dependencyGraphManifests.edges;
         }
         const data = await this.getPaginatedQuery(QUERY_DEPENDENCY_GRAPH, { organizationName: repo.owner, repositoryName: repo.repo }, 'repository.dependencyGraphManifests.pageInfo', extractDependencySetData, { accept: 'application/vnd.github.hawkgirl-preview+json' });
         return data.map(node => new DependencySet(node));
+    }
+    /**
+     * Returns the repository's resolved dependencies from its dependency-graph SBOM.
+     *
+     * Uses the asynchronous SBOM API: request a report, then poll until GitHub has built
+     * it. This replaces expanding `dependencyGraphManifests.dependencies` over GraphQL,
+     * which exceeds GitHub's server-side query budget on repositories with a large
+     * lockfile and fails with `timedout`.
+     *
+     * Falls back to the synchronous endpoint when the asynchronous one is unavailable
+     * (older GitHub Enterprise Server). That endpoint is deprecated on github.com and is
+     * scheduled for removal on 2026-11-13.
+     */
+    async getSbomDependencies(repo, options = {}) {
+        const document = await this.fetchSbomDocument(repo, options);
+        // The asynchronous endpoint returns the SPDX document directly; the synchronous one
+        // nests it under `sbom`.
+        const packages = document?.sbom?.packages ?? document?.packages;
+        if (!packages) {
+            throw new Error(`The dependency-graph SBOM for ${repo.owner}/${repo.repo} contained no package list`);
+        }
+        return packages
+            .filter(pkg => !isRepositorySelfPackage(pkg))
+            .map(pkg => Dependency.fromSbomPackage(pkg));
+    }
+    /**
+     * The completed SBOM is served from a redirect target that does not always carry a JSON
+     * content type, in which case Octokit hands back the raw body as a string.
+     */
+    parseSbomBody(data, repo) {
+        if (typeof data !== 'string') {
+            return data;
+        }
+        try {
+            return JSON.parse(data);
+        }
+        catch (err) {
+            throw new Error(`Could not parse the dependency-graph SBOM for ${repo.owner}/${repo.repo}: ${err.message}`);
+        }
+    }
+    async fetchSbomDocument(repo, options) {
+        const timeoutMs = options.timeoutMs ?? DEFAULT_SBOM_TIMEOUT_MS;
+        const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_SBOM_POLL_INTERVAL_MS;
+        const deadline = Date.now() + timeoutMs;
+        let sbomUrl;
+        try {
+            const generated = await this.octokit.request('GET /repos/{owner}/{repo}/dependency-graph/sbom/generate-report', { owner: repo.owner, repo: repo.repo });
+            sbomUrl = generated.data.sbom_url;
+        }
+        catch (err) {
+            if (err?.status === 404) {
+                return await this.fetchSbomDocumentSynchronously(repo);
+            }
+            throw err;
+        }
+        while (true) {
+            const response = await this.octokit.request(`GET ${sbomUrl}`);
+            // 202 means GitHub is still building the report.
+            if (response.status !== 202) {
+                return this.parseSbomBody(response.data, repo);
+            }
+            if (Date.now() + pollIntervalMs > deadline) {
+                throw new Error(`Timed out after ${timeoutMs}ms waiting for the dependency-graph SBOM of ${repo.owner}/${repo.repo} to be generated`);
+            }
+            await delay(pollIntervalMs);
+        }
+    }
+    async fetchSbomDocumentSynchronously(repo) {
+        const response = await this.octokit.request('GET /repos/{owner}/{repo}/dependency-graph/sbom', { owner: repo.owner, repo: repo.repo });
+        return this.parseSbomBody(response.data, repo);
     }
     async getPaginatedQuery(query, parameters, pageInfoPath, extractResultsFn, headers) {
         const octokit = this.octokit;
@@ -285112,6 +285201,9 @@ class ReportData {
     get dependencies() {
         return this.data.dependencies || [];
     }
+    get sbomDependencies() {
+        return this.data.sbomDependencies || [];
+    }
     get openDependencyVulnerabilities() {
         return this.vulnerabilities.filter(vuln => vuln.state !== 'fixed');
     }
@@ -285188,9 +285280,7 @@ class ReportData {
         const unprocessed = [];
         const processed = [];
         const dependencies = {};
-        let totalDeps = 0;
         this.dependencies.forEach(depSet => {
-            totalDeps += depSet.count;
             const manifest = {
                 filename: depSet.filename,
                 path: depSet.path
@@ -285201,27 +285291,26 @@ class ReportData {
             else {
                 unprocessed.push(manifest);
             }
-            const identifiedDeps = depSet.dependencies;
-            if (identifiedDeps) {
-                identifiedDeps.forEach(dep => {
-                    const type = dep.packageType.toLowerCase();
-                    if (!dependencies[type]) {
-                        dependencies[type] = [];
-                    }
-                    dependencies[type].push({
-                        name: dep.name,
-                        type: dep.packageType,
-                        version: dep.version
-                    });
-                });
+        });
+        // Dependencies come from the SBOM rather than the manifests, so they are not attributed
+        // back to the manifest that introduced them -- the report groups them by package manager.
+        this.sbomDependencies.forEach(dep => {
+            const type = dep.packageType.toLowerCase();
+            if (!dependencies[type]) {
+                dependencies[type] = [];
             }
+            dependencies[type].push({
+                name: dep.name,
+                type: dep.packageType,
+                version: dep.version
+            });
         });
         return {
             manifests: {
                 processed,
                 unprocessed
             },
-            totalDependencies: totalDeps,
+            totalDependencies: this.sbomDependencies.length,
             dependencies
         };
     }
@@ -285392,7 +285481,8 @@ class DataCollector {
             ghDeps.getAllDependencies(this.repo),
             ghDeps.getAllVulnerabilities(this.repo),
             codeScanning.getOpenCodeScanningAlerts(this.repo),
-            codeScanning.getClosedCodeScanningAlerts(this.repo)
+            codeScanning.getClosedCodeScanningAlerts(this.repo),
+            ghDeps.getSbomDependencies(this.repo)
         ]);
         const data = {
             github: this.repo,
@@ -285400,7 +285490,8 @@ class DataCollector {
             dependencies: results[1],
             vulnerabilities: results[2],
             codeScanningOpen: results[3],
-            codeScanningClosed: results[4]
+            codeScanningClosed: results[4],
+            sbomDependencies: results[5]
         };
         return new ReportData(data);
     }
@@ -290916,7 +291007,7 @@ function delayWhen(delayDurationSelector, subscriptionDelay) {
 }
 
 // node_modules/rxjs/dist/esm5/internal/operators/delay.js
-function delay(due, scheduler) {
+function rxjs_delay(due, scheduler) {
   if (scheduler === void 0) {
     scheduler = asyncScheduler;
   }

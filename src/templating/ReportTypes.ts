@@ -4,6 +4,7 @@
 import type CodeScanningRule from '../sarif/CodeScanningRule.ts'
 import type Vulnerability from '../dependencies/Vulnerability.ts'
 import type DependencySet from '../dependencies/DependencySet.ts'
+import type SbomDependency from '../dependencies/Dependency.ts'
 import type { SarifFile } from '../sarif/SarifReportFinder.ts'
 import type CodeScanningResults from '../codeScanning/CodeScanningResults.ts'
 import type { AlertInstanceLocation } from '../codeScanning/CodeScanningAlert.ts'
@@ -30,6 +31,7 @@ export interface CollectedData {
   github: Repo
   vulnerabilities: Vulnerability[]
   dependencies: DependencySet[]
+  sbomDependencies: SbomDependency[]
   sarifReports: SarifFile[]
   codeScanningOpen: CodeScanningResults
   codeScanningClosed: CodeScanningResults

@@ -45,7 +45,8 @@ export default class DataCollector {
       ghDeps.getAllDependencies(this.repo),
       ghDeps.getAllVulnerabilities(this.repo),
       codeScanning.getOpenCodeScanningAlerts(this.repo),
-      codeScanning.getClosedCodeScanningAlerts(this.repo)
+      codeScanning.getClosedCodeScanningAlerts(this.repo),
+      ghDeps.getSbomDependencies(this.repo)
     ])
 
     const data: CollectedData = {
@@ -54,7 +55,8 @@ export default class DataCollector {
       dependencies: results[1],
       vulnerabilities: results[2],
       codeScanningOpen: results[3],
-      codeScanningClosed: results[4]
+      codeScanningClosed: results[4],
+      sbomDependencies: results[5]
     }
 
     return new ReportData(data)

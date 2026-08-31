@@ -3,6 +3,7 @@
  **********************************************************************/
 import type Vulnerability from '../dependencies/Vulnerability.ts'
 import type DependencySet from '../dependencies/DependencySet.ts'
+import type SbomDependency from '../dependencies/Dependency.ts'
 import type { SarifFile } from '../sarif/SarifReportFinder.ts'
 import type CodeScanningResults from '../codeScanning/CodeScanningResults.ts'
 import type CodeScanningRule from '../sarif/CodeScanningRule.ts'
@@ -34,6 +35,10 @@ export default class ReportData {
 
   get dependencies (): DependencySet[] {
     return this.data.dependencies || []
+  }
+
+  get sbomDependencies (): SbomDependency[] {
+    return this.data.sbomDependencies || []
   }
 
   get openDependencyVulnerabilities (): Vulnerability[] {
@@ -130,11 +135,7 @@ export default class ReportData {
     const processed: Manifest[] = []
     const dependencies: Dependencies = {}
 
-    let totalDeps = 0
-
     this.dependencies.forEach(depSet => {
-      totalDeps += depSet.count
-
       const manifest = {
         filename: depSet.filename,
         path: depSet.path
@@ -145,23 +146,22 @@ export default class ReportData {
       } else {
         unprocessed.push(manifest)
       }
+    })
 
-      const identifiedDeps = depSet.dependencies
-      if (identifiedDeps) {
-        identifiedDeps.forEach(dep => {
-          const type = dep.packageType.toLowerCase()
+    // Dependencies come from the SBOM rather than the manifests, so they are not attributed
+    // back to the manifest that introduced them -- the report groups them by package manager.
+    this.sbomDependencies.forEach(dep => {
+      const type = dep.packageType.toLowerCase()
 
-          if (!dependencies[type]) {
-            dependencies[type] = []
-          }
-
-          dependencies[type].push({
-            name: dep.name,
-            type: dep.packageType,
-            version: dep.version
-          })
-        })
+      if (!dependencies[type]) {
+        dependencies[type] = []
       }
+
+      dependencies[type].push({
+        name: dep.name,
+        type: dep.packageType,
+        version: dep.version
+      })
     })
 
     return {
@@ -169,7 +169,7 @@ export default class ReportData {
         processed,
         unprocessed
       },
-      totalDependencies: totalDeps,
+      totalDependencies: this.sbomDependencies.length,
       dependencies
     }
   }

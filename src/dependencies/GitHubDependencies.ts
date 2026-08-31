@@ -8,15 +8,29 @@ import {
   QUERY_SECURITY_VULNERABILITIES,
   QUERY_DEPENDENCY_GRAPH,
   type VulnerabilityAlert,
-  type DependencySetData, type RepositoryVulnerabilityAlerts, type DependencyGraphResult
+  type DependencySetData, type RepositoryVulnerabilityAlerts, type DependencyGraphResult,
+  type SbomResponse
 } from './DependencyTypes.ts'
 
 import Vulnerability from './Vulnerability.ts'
+import Dependency, { isRepositorySelfPackage } from './Dependency.ts'
 import DependencySet from './DependencySet.ts'
 
 interface Repo {
   owner: string
   repo: string
+}
+
+export interface SbomPollOptions {
+  timeoutMs?: number
+  pollIntervalMs?: number
+}
+
+const DEFAULT_SBOM_TIMEOUT_MS = 60_000
+const DEFAULT_SBOM_POLL_INTERVAL_MS = 2_000
+
+async function delay (ms: number): Promise<void> {
+  await new Promise(resolve => setTimeout(resolve, ms))
 }
 
 export default class GitHubDependencies {
@@ -41,6 +55,10 @@ export default class GitHubDependencies {
     return data.map(val => new Vulnerability(val))
   }
 
+  /**
+   * Returns metadata for every dependency manifest GitHub has detected for the repository.
+   * This does not include the dependencies themselves -- see getSbomDependencies().
+   */
   async getAllDependencies (repo: Repo): Promise<DependencySet[]> {
     function extractDependencySetData (data: DependencyGraphResult): DependencySetData[] {
       return data.repository.dependencyGraphManifests.edges
@@ -55,6 +73,99 @@ export default class GitHubDependencies {
     )
 
     return data.map(node => new DependencySet(node))
+  }
+
+  /**
+   * Returns the repository's resolved dependencies from its dependency-graph SBOM.
+   *
+   * Uses the asynchronous SBOM API: request a report, then poll until GitHub has built
+   * it. This replaces expanding `dependencyGraphManifests.dependencies` over GraphQL,
+   * which exceeds GitHub's server-side query budget on repositories with a large
+   * lockfile and fails with `timedout`.
+   *
+   * Falls back to the synchronous endpoint when the asynchronous one is unavailable
+   * (older GitHub Enterprise Server). That endpoint is deprecated on github.com and is
+   * scheduled for removal on 2026-11-13.
+   */
+  async getSbomDependencies (repo: Repo, options: SbomPollOptions = {}): Promise<Dependency[]> {
+    const document = await this.fetchSbomDocument(repo, options)
+
+    // The asynchronous endpoint returns the SPDX document directly; the synchronous one
+    // nests it under `sbom`.
+    const packages = document?.sbom?.packages ?? document?.packages
+
+    if (!packages) {
+      throw new Error(
+        `The dependency-graph SBOM for ${repo.owner}/${repo.repo} contained no package list`
+      )
+    }
+
+    return packages
+      .filter(pkg => !isRepositorySelfPackage(pkg))
+      .map(pkg => Dependency.fromSbomPackage(pkg))
+  }
+
+  /**
+   * The completed SBOM is served from a redirect target that does not always carry a JSON
+   * content type, in which case Octokit hands back the raw body as a string.
+   */
+  private parseSbomBody (data: unknown, repo: Repo): SbomResponse {
+    if (typeof data !== 'string') {
+      return data as SbomResponse
+    }
+
+    try {
+      return JSON.parse(data) as SbomResponse
+    } catch (err: any) {
+      throw new Error(
+        `Could not parse the dependency-graph SBOM for ${repo.owner}/${repo.repo}: ${err.message as string}`
+      )
+    }
+  }
+
+  private async fetchSbomDocument (repo: Repo, options: SbomPollOptions): Promise<SbomResponse | null> {
+    const timeoutMs = options.timeoutMs ?? DEFAULT_SBOM_TIMEOUT_MS
+    const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_SBOM_POLL_INTERVAL_MS
+    const deadline = Date.now() + timeoutMs
+
+    let sbomUrl: string
+    try {
+      const generated = await this.octokit.request(
+        'GET /repos/{owner}/{repo}/dependency-graph/sbom/generate-report',
+        { owner: repo.owner, repo: repo.repo }
+      )
+      sbomUrl = (generated.data as { sbom_url: string }).sbom_url
+    } catch (err: any) {
+      if (err?.status === 404) {
+        return await this.fetchSbomDocumentSynchronously(repo)
+      }
+      throw err
+    }
+
+    while (true) {
+      const response = await this.octokit.request(`GET ${sbomUrl}`)
+
+      // 202 means GitHub is still building the report.
+      if (response.status !== 202) {
+        return this.parseSbomBody(response.data, repo)
+      }
+
+      if (Date.now() + pollIntervalMs > deadline) {
+        throw new Error(
+          `Timed out after ${timeoutMs}ms waiting for the dependency-graph SBOM of ${repo.owner}/${repo.repo} to be generated`
+        )
+      }
+
+      await delay(pollIntervalMs)
+    }
+  }
+
+  private async fetchSbomDocumentSynchronously (repo: Repo): Promise<SbomResponse> {
+    const response = await this.octokit.request(
+      'GET /repos/{owner}/{repo}/dependency-graph/sbom',
+      { owner: repo.owner, repo: repo.repo }
+    )
+    return this.parseSbomBody(response.data, repo)
   }
 
   async getPaginatedQuery<T, Y>(query: string, parameters: Record<string, unknown>, pageInfoPath: string, extractResultsFn: (val: T) => Y[], headers?): Promise<Y[]> {
