@@ -284880,6 +284880,18 @@ const DEFAULT_SBOM_POLL_INTERVAL_MS = 2_000;
 async function delay(ms) {
     await new Promise(resolve => setTimeout(resolve, ms));
 }
+const SBOM_UUID_PATTERN = /\/dependency-graph\/sbom\/fetch-report\/([^/?#]+)$/;
+/**
+ * Pulls the report id out of the `sbom_url` handed back by generate-report, so polling
+ * can go through Octokit's templated route instead of following the URL verbatim.
+ */
+function extractSbomUuid(sbomUrl, repo) {
+    const matched = sbomUrl ? SBOM_UUID_PATTERN.exec(sbomUrl) : null;
+    if (!matched) {
+        throw new Error(`Could not read a report id from the dependency-graph SBOM URL for ${repo.owner}/${repo.repo}: ${String(sbomUrl)}`);
+    }
+    return matched[1];
+}
 class GitHubDependencies {
     octokit;
     constructor(octokit) {
@@ -284946,10 +284958,10 @@ class GitHubDependencies {
         const timeoutMs = options.timeoutMs ?? DEFAULT_SBOM_TIMEOUT_MS;
         const pollIntervalMs = options.pollIntervalMs ?? DEFAULT_SBOM_POLL_INTERVAL_MS;
         const deadline = Date.now() + timeoutMs;
-        let sbomUrl;
+        let sbomUuid;
         try {
             const generated = await this.octokit.request('GET /repos/{owner}/{repo}/dependency-graph/sbom/generate-report', { owner: repo.owner, repo: repo.repo });
-            sbomUrl = generated.data.sbom_url;
+            sbomUuid = extractSbomUuid(generated.data.sbom_url, repo);
         }
         catch (err) {
             if (err?.status === 404) {
@@ -284958,7 +284970,10 @@ class GitHubDependencies {
             throw err;
         }
         while (true) {
-            const response = await this.octokit.request(`GET ${sbomUrl}`);
+            // Polled through the templated route rather than by following `sbom_url` verbatim,
+            // so the request stays on the configured GitHub API host and the credential is
+            // never sent to whatever host the response happens to name.
+            const response = await this.octokit.request('GET /repos/{owner}/{repo}/dependency-graph/sbom/fetch-report/{sbom_uuid}', { owner: repo.owner, repo: repo.repo, sbom_uuid: sbomUuid });
             // 202 means GitHub is still building the report.
             if (response.status !== 202) {
                 return this.parseSbomBody(response.data, repo);
