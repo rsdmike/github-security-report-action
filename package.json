@@ -33,7 +33,7 @@
     "@octokit/types": "^17.0.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^22.20.1",
+    "@types/node": "^26.4.0",
     "@types/sinon": "^22.0.0",
     "@vercel/ncc": "^0.45.0",
     "chai": "^6.2.2",
