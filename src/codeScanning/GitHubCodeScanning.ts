@@ -22,28 +22,34 @@ export default class GitHubCodeScanning {
   }
 
   async getOpenCodeScanningAlerts (repo: Repo): Promise<CodeScanningResults> {
-    return await getCodeScanning(this.octokit, repo, 'open')
+    return await getCodeScanning(this.octokit, repo, ['open'])
   }
 
   async getClosedCodeScanningAlerts (repo: Repo): Promise<CodeScanningResults> {
-    return await getCodeScanning(this.octokit, repo, 'dismissed')
+    return await getCodeScanning(this.octokit, repo, ['dismissed', 'fixed'])
   }
 }
 
-async function getCodeScanning (octokit: Octokit, repo: Repo, state: 'open' | 'fixed' | 'dismissed'): Promise<CodeScanningResults> {
-  const params: listCodeScanningAlertsParameters = {
-    owner: repo.owner,
-    repo: repo.repo,
-    // ref: 'refs/pull/1377/merge', for testing
-    state
-  }
+type AlertState = 'open' | 'fixed' | 'dismissed'
 
-  const alerts: CodeScanningData[] = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts' as string, params)
+// The alerts API filters on a single state, so each state is fetched separately and combined.
+async function getCodeScanning (octokit: Octokit, repo: Repo, states: AlertState[]): Promise<CodeScanningResults> {
   const results: CodeScanningResults = new CodeScanningResults()
 
-  alerts.forEach((alert: CodeScanningData) => {
-    results.addCodeScanningAlert(new CodeScanningAlert(alert))
-  })
+  for (const state of states) {
+    const params: listCodeScanningAlertsParameters = {
+      owner: repo.owner,
+      repo: repo.repo,
+      // ref: 'refs/pull/1377/merge', for testing
+      state
+    }
+
+    const alerts: CodeScanningData[] = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts' as string, params)
+
+    alerts.forEach((alert: CodeScanningData) => {
+      results.addCodeScanningAlert(new CodeScanningAlert(alert))
+    })
+  }
 
   return results
 }
