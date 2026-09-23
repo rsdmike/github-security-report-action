@@ -33,8 +33,11 @@ export default class GitHubCodeScanning {
 type AlertState = 'open' | 'fixed' | 'dismissed'
 
 // The alerts API filters on a single state, so each state is fetched separately and combined.
+// A dismissed alert whose code was later fixed is returned for both 'dismissed' and 'fixed',
+// so alerts are de-duplicated by number.
 async function getCodeScanning (octokit: Octokit, repo: Repo, states: AlertState[]): Promise<CodeScanningResults> {
   const results: CodeScanningResults = new CodeScanningResults()
+  const seen = new Set<number>()
 
   for (const state of states) {
     const params: listCodeScanningAlertsParameters = {
@@ -47,6 +50,10 @@ async function getCodeScanning (octokit: Octokit, repo: Repo, states: AlertState
     const alerts: CodeScanningData[] = await octokit.paginate('GET /repos/{owner}/{repo}/code-scanning/alerts' as string, params)
 
     alerts.forEach((alert: CodeScanningData) => {
+      if (seen.has(alert.number)) {
+        return
+      }
+      seen.add(alert.number)
       results.addCodeScanningAlert(new CodeScanningAlert(alert))
     })
   }

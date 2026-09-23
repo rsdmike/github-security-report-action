@@ -76,5 +76,20 @@ describe('GitHubDependencies', () => {
       expect(requestedStates).to.deep.equal(['dismissed', 'fixed'])
       expect(results.getCodeQLScanningAlerts().map(alert => alert.state)).to.deep.equal(['dismissed', 'fixed', 'fixed'])
     })
+
+    it('counts an alert returned for both dismissed and fixed once', async () => {
+      const dismissedThenFixed = { number: 1, state: 'dismissed', tool: { name: 'CodeQL' }, rule: {} }
+      const alertsByState = {
+        dismissed: [dismissedThenFixed],
+        fixed: [dismissedThenFixed, { number: 2, state: 'fixed', tool: { name: 'CodeQL' }, rule: {} }]
+      }
+      const stubOctokit = {
+        paginate: async (_route: string, params: { state: string }) => alertsByState[params.state]
+      }
+
+      const results = await new GitHubCodeScanning(stubOctokit).getClosedCodeScanningAlerts(testRepo)
+
+      expect(results.getCodeQLScanningAlerts().map(alert => alert.state)).to.deep.equal(['dismissed', 'fixed'])
+    })
   })
 })
