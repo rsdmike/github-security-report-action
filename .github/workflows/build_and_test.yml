@@ -2,6 +2,9 @@ name: Build and Test
 
 on:
   push:
+    branches: [ main ]
+  # Fork PRs push to the fork, so only this trigger reports the required test checks.
+  pull_request:
   workflow_dispatch:
 
 permissions:
