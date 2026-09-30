@@ -19,7 +19,7 @@ async function run (): Promise<void> {
       outputDirectory: getRequiredInputValue('outputDir'),
 
       templating: {
-        directory: path.join(import.meta.dirname, 'templates'),
+        directory: core.getInput('templateDir') || path.join(import.meta.dirname, 'templates'),
         name: getRequiredInputValue('template')
       }
     })

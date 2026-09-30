@@ -27,6 +27,11 @@ inputs:
     required: false
     default: summary
 
+  templateDir:
+    description: Directory containing a custom template named by `template`. Defaults to the templates bundled with the action.
+    required: false
+    default: ""
+
 runs:
   using: node24
   main: dist/index.js
