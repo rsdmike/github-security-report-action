@@ -27,7 +27,7 @@
     "jsdom": "^28.1.0",
     "marked": "^18.0.13",
     "nunjucks": "^3.2.4",
-    "puppeteer-core": "^25.9.0"
+    "puppeteer-core": "^25.16.0"
   },
   "devDependencies": {
     "@octokit/types": "^17.0.0",
